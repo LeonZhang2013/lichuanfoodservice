@@ -19,7 +19,6 @@ public class CommonController extends BaseController {
 
 
 	@RequestMapping(value="getArea",method={RequestMethod.POST})
-//	@ApiMethod(summary = "获得地域列表",
 	public MultiResult<Map<String,Object>> getArea(String parentId){
 		MultiResult<Map<String,Object>> result = new MultiResult<>();
 		try {
@@ -39,16 +38,16 @@ public class CommonController extends BaseController {
 
 	/**
 	 * 发送验证短信。
-	 *
-	 * @param phone 获取电话号码
+	 * @param phone   获取电话号码
+	 * @param isRegister 是否是注册 注册 true 否 false
 	 * @return
 	 */
 	@RequestMapping("getVerCode")
-	public SingleResult<Map<String, Object>> getVerCdoe(String phone,boolean update) {
+	public SingleResult<Map<String, Object>> getVerCdoe(String phone,boolean isRegister) {
 		SingleResult<Map<String, Object>> result = new SingleResult<>();
 		try {
 			//如果是更新密码，就不用验证手机号是否存在。
-			if(!update)userService.phoneHasEixst(phone);
+			if(isRegister)userService.phoneHasEixst(phone);
 			result = aliYunService.sendMassage(phone);
 		} catch (Exception e) {
 			e.printStackTrace();
