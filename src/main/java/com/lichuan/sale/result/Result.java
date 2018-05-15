@@ -23,7 +23,16 @@ public abstract class Result {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
+	public void setMessageOfSuccess(String message) {
+		this.code = Code.ERROR;
+		this.message = message;
+	}
+
+	public void setMessageOfError(String message) {
+		this.code = Code.SUCCESS;
+		this.message = message;
+	}
 
 	@Override
 	public String toString() {

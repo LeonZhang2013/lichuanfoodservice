@@ -1,6 +1,7 @@
 package com.lichuan.sale.tools;
 
 
+import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.tools.encrypt.Algorithm;
 import com.lichuan.sale.tools.encrypt.MessageDigestUtils;
 
@@ -15,8 +16,12 @@ public class Tools {
         return System.currentTimeMillis()+new Random().nextInt(999);
     }
 
-    public static String encryptPass(String username,String newPwd) throws Exception {
-       return MessageDigestUtils.encrypt(username + newPwd, Algorithm.SHA1);
+    public static String encryptPass(String username,String newPwd) throws CustomException {
+        try {
+            return MessageDigestUtils.encrypt(username + newPwd, Algorithm.SHA1);
+        } catch (Exception e) {
+            throw new CustomException("加密失败");
+        }
     }
 
     public static void PraseDate(List<Map<String, Object>> data, String key) {
