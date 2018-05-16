@@ -6,9 +6,11 @@ import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.Product;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.tools.Arith;
+import com.lichuan.sale.tools.SqlInfo;
 import com.lichuan.sale.tools.StringUtils;
 import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.Pager;
+import com.lichuan.sale.tools.sqltools.SQLTools;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +39,9 @@ public class ProductService extends BaseService {
         return productDao.getCategory(pager,key,categoryId,islist);
     }
 
-    public boolean updateProduct(Product product) {
-        int effect = productDao.updateSupplier(product.getId());
-        return effect >0;
+    public int updateProduct(Product product) {
+        SqlInfo sqlInfo = new SQLTools().getUpdateById(product, "product",  product.getId());
+        return jdbcTemplate.update(sqlInfo.getSql(), sqlInfo.getValues());
     }
 
 

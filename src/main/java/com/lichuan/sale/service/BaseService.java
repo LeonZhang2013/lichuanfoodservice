@@ -9,6 +9,9 @@ import javax.annotation.Resource;
 public class BaseService  {
 
     @Autowired
+    ShopCartDao shopCartDao;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Autowired
