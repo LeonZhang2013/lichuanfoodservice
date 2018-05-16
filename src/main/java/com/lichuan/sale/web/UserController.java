@@ -39,13 +39,12 @@ public class UserController extends BaseController {
     }
 
 
-
     @PostMapping("register")
     public SingleResult<String> register(User user, UserAddress userAddress,String vercode) {
         SingleResult<String> result = new SingleResult<>();
         try {
             if (commonService.verCode(user.getMobile(), vercode)) {
-                if (null == user.getRole_id()) user.setRole_id(13L);
+                if (null == user.getRole_id()) user.setRole_id(9999l);
                 user.setUsername(user.getMobile());
                 userService.addUser(user, userAddress);
                 result.setMessageOfSuccess("注册用户成功");

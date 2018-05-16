@@ -30,9 +30,9 @@ public class UserDao extends BaseDao{
 
 
     public boolean userExist(String username) {
-        String sql = "SELECT id from USER where username=? ";
-        List<Map<String, Object>> users = jdbcTemplate.queryForList(sql, new Object[]{username});
-        return users.size()>0;
+        String sql = "SELECT COUNT(id) from USER where username=? ";
+        int count = jdbcTemplate.queryForObject(sql, new Object[]{username},Integer.class);
+        return count>0;
     }
 
     public boolean phoneHasEixst(String phone) {
