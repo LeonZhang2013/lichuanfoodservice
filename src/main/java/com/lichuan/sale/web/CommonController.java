@@ -1,6 +1,7 @@
 package com.lichuan.sale.web;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.lichuan.sale.model.Role;
 import com.lichuan.sale.model.Version;
 import com.lichuan.sale.result.Code;
@@ -76,6 +77,57 @@ public class CommonController extends BaseController {
 		return result;
 	}
 
+	/**
+	 * 获取权限。
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("getMyPermissions")
+	public SingleResult<Object> getPermission(String role_id) {
+		SingleResult<Object> result = new SingleResult<>();
+		try {
+			List<Map<String, Object>> permissions = commonService.getPermissions();
+			List<Map<String, Object>> myPermissions = commonService.getMyPermissions(role_id);
+			for (int i = 0; i < permissions.size(); i++) {
+				Object item = permissions.get(i).get("id");
+				permissions.get(i).put("check", "false");
+				for (int j = 0; j < myPermissions.size(); j++) {
+					Object exit = myPermissions.get(j).get("permission_id");
+					if (item.toString().equals(exit.toString())) {
+						permissions.get(i).put("check", "true");
+					}
+				}
+			}
+
+			result.setCode(Code.SUCCESS);
+			result.setData(permissions);
+		} catch (Exception e) {
+			result.setCode(Code.ERROR);
+			result.setMessage(e.getMessage());
+		}
+		return result;
+	}
+
+	/**
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("updateRole")
+	public SingleResult<Object> updateRole(String role_id, String permissions) {
+		SingleResult<Object> result = new SingleResult<>();
+		try {
+			JSONArray groupJson = JSON.parseArray(permissions);
+			commonService.updateRole(getUserId(),role_id, groupJson);
+			result.setCode(Code.SUCCESS);
+			result.setMessage("更新成功");
+		} catch (Exception e) {
+			result.setCode(Code.ERROR);
+			result.setMessage(e.getMessage());
+		}
+		return result;
+	}
 
 
 	/**

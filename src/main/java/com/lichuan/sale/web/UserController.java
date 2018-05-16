@@ -41,12 +41,18 @@ public class UserController extends BaseController {
 
 
     @PostMapping("register")
-    public SingleResult<String> register(User user, UserAddress userAddress) {
+    public SingleResult<String> register(User user, UserAddress userAddress,String vercode) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            if (null == user.getRole_id()) user.setRole_id(13L);
-            userService.addUser(user, userAddress);
-            result.setMessageOfSuccess("注册用户成功");
+            if (commonService.verCode(user.getMobile(), vercode)) {
+                if (null == user.getRole_id()) user.setRole_id(13L);
+                user.setUsername(user.getMobile());
+                userService.addUser(user, userAddress);
+                result.setMessageOfSuccess("注册用户成功");
+            }else {
+                result.setCode(Code.ERROR);
+                result.setMessage("验证码有误");
+            }
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }

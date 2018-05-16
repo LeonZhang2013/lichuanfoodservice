@@ -57,12 +57,12 @@ public class UserService extends BaseService {
     }
 
     public void addUser(User user, UserAddress userAddress) throws CustomException {
-        String encryptPass = Tools.encryptPass(user.getUsername(), user.getPassword());
-        user.setPassword(encryptPass);
         if (userDao.userExist(user.getUsername())) {
             throw new CustomException("用户名或手机号已存在");
         }
 
+        String encryptPass = Tools.encryptPass(user.getUsername(), user.getPassword());
+        user.setPassword(encryptPass);
         Long id = userDao.addUser(user);
         userAddress.setUser_id(id);
         userDao.addAddress(userAddress);

@@ -5,17 +5,14 @@ import javax.persistence.*;
 public class User {
 
     private Long id;
-
+    private String icon;
     private String username;
-
     private String password;
-
     private String nickname;
-
     private String mobile;
-
     private String token;
-
+    private String realname;
+    private Integer sex;
     /**
      * 1：正常，2：冻结
      */
@@ -36,7 +33,29 @@ public class User {
      */
     private Integer is_multi;
 
+    public String getIcon() {
+        return icon;
+    }
 
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getRealname() {
+        return realname;
+    }
+
+    public void setRealname(String realname) {
+        this.realname = realname;
+    }
+
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
 
     public Long getId() {
         return id;

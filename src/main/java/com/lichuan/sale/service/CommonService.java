@@ -59,4 +59,16 @@ public class CommonService extends BaseService {
     public Version checkVersion(Integer code, String packageName)throws Exception{
         return commonDao.checkVersion(code,packageName);
     }
+
+    public List<Map<String,Object>>  getPermissions() {
+        return commonDao.getPermissions();
+    }
+
+    public void updateRole(Long userId, String role_id, JSONArray groupJson) {
+        commonDao.updateRole(userId,role_id,groupJson);
+    }
+
+    public List<Map<String,Object>> getMyPermissions(String role_id) {
+        return commonDao.getMyPermissions(role_id);
+    }
 }
