@@ -32,11 +32,10 @@ public class UserService extends BaseService {
         Map<String, Object> data = new HashMap<>();
         try {
             User user = userDao.login(username, password);
+            if (user.getRole_id() == 0)throw new CustomException("正在审核中...");
             if (user == null) throw new CustomException("用户名或密码错误");
             List<Role> role = commonDao.getRoles(user.getRole_id());
-            if (user.getRole_id() == 0) {
-                throw new CustomException("正在审核中...");
-            }
+
             //是否允许多用户登录
             if (StringUtils.isNull(user.getToken()) || user.getIs_multi() == 0) {
                 String token = StringUtils.uuid();
