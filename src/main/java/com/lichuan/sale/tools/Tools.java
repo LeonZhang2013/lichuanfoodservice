@@ -5,12 +5,17 @@ import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.tools.encrypt.Algorithm;
 import com.lichuan.sale.tools.encrypt.MessageDigestUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class Tools {
+
+    public static Object priseTimestamp(Timestamp timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp.getTime());
+        return DateUtils.parseCalendar2String(calendar, "yyyy-MM-dd HH:mm:ss");
+    }
+
 
     public static Long generatorId() {
         return System.currentTimeMillis()+new Random().nextInt(999);

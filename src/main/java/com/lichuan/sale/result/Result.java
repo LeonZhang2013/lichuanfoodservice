@@ -25,12 +25,19 @@ public abstract class Result {
 	}
 
 	public void setMessageOfSuccess(String message) {
-		this.code = Code.ERROR;
+		this.code = Code.SUCCESS;
 		this.message = message;
+	}
+	public void setMessageOfSuccess() {
+		this.code = Code.SUCCESS;
+	}
+
+	public void setMessageOfError() {
+		this.code = Code.ERROR;
 	}
 
 	public void setMessageOfError(String message) {
-		this.code = Code.SUCCESS;
+		this.code = Code.ERROR;
 		this.message = message;
 	}
 

@@ -9,6 +9,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class BaseController {
 
     @Autowired
+    OrderService orderService;
+
+    @Autowired
     ProductService productService;
 
     @Autowired

@@ -132,4 +132,10 @@ public class UserDao extends BaseDao{
         int effect = jdbcTemplate.update(sql, city, user_id);
         return effect;
     }
+
+    public String getProxyId(Long user_id) {
+        String sql = "select proxy_id from USER WHERE id = ?;";
+        String id = jdbcTemplate.queryForObject(sql, new Object[]{user_id}, String.class);
+        return id;
+    }
 }

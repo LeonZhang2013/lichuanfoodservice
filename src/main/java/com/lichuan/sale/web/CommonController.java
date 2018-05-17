@@ -109,10 +109,12 @@ public class CommonController extends BaseController {
 		return result;
 	}
 
+
 	/**
 	 *
+	 * @param role_id
+	 * @param permissions  json列表 {1,2,3}
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping("updateRole")
 	public SingleResult<Object> updateRole(String role_id, String permissions) {

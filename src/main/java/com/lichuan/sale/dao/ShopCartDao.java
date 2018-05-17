@@ -69,4 +69,7 @@ public class ShopCartDao extends BaseDao {
         int effect = jdbcTemplate.update(sql,userId);
         return effect;
     }
+
+
+
 }

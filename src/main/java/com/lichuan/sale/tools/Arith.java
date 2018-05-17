@@ -144,79 +144,33 @@ public final class Arith{
         return Math.abs(sub(d1, d2)) <= 0.0000001;  
     }
 
-    public static void calProductSalePrice(List<Map<String, Object>> maps, Float user_percent){
-        calShopCartPrice(maps,new BigDecimal(user_percent),null);
-    }
-    public static void calProductSalePrice(List<Map<String, Object>> maps, BigDecimal user_percent){
-        calShopCartPrice(maps,user_percent,null);
-    }
+
 
     /**
      * 计算商品价格   仅仅用于  提交订单之前。
-     * @param maps 商品 （price，percent_price，num，other_charge）
-     * @param userPerFreight  对应map num 的Key.    PS(map.put("buy_num",8)) 这里传 key 就是 buy_num
-     * @param user_percent （代理商 利润点+）
+     * @param maps 商品 （price，num，other_charge）
+     * @param  distanceL  距离基数
      * @return 返回商品总价（包含杂费和利润点，不包含运费）。
      */
-    public static BigDecimal calShopCartPrice(List<Map<String, Object>> maps, BigDecimal user_percent, BigDecimal userPerFreight) {
+    public static BigDecimal calShopCartPrice(List<Map<String, Object>> maps, Long distanceL) {
         BigDecimal productTotalPrice = new BigDecimal(0);
+        BigDecimal distance = new BigDecimal(distanceL);
         for (int i=0; i<maps.size(); i++){
             Map<String, Object> map = maps.get(i);
             BigDecimal price = new BigDecimal(map.get("price").toString());
-            BigDecimal percent = new BigDecimal(map.get("percent_price").toString());
             BigDecimal num = new BigDecimal(map.get("num").toString());
-            BigDecimal other_charge = new BigDecimal(map.get("other_charge").toString());
-            BigDecimal devPercent = percent.divide(new BigDecimal(100)).add(new BigDecimal(1));
-            BigDecimal devUserPercent = user_percent.divide(new BigDecimal(100)).add(new BigDecimal(1));
-            //公司一件的售价（件） = （进货价 * 公司利润点/100  + 进货价） * 单件数量 + 单件的其他杂费。
-            BigDecimal piece_price = price.multiply(num).multiply(devPercent).add(other_charge);
-            //代理商一件的售价（件） = 公司售价+ 公司售价＊商家利润点／１００；
-            piece_price = piece_price.multiply(devUserPercent);
-            //=======================================================================================
-            BigDecimal priceSale = piece_price.divide(num,BigDecimal.ROUND_UP).setScale(SALE_SCALE,BigDecimal.ROUND_UP);
-            BigDecimal pieceSale = priceSale.multiply(num).setScale(PIECE_SCALE,BigDecimal.ROUND_UP);
-            //一斤的售价(单价) = 销售价/ 单件数量
-            map.put("price_sale",priceSale);
-            map.put("piece_price",pieceSale);
-            if(userPerFreight!=null){
-                BigDecimal buyNum = new BigDecimal(map.get("buy_num").toString());
-                BigDecimal subProductPrice = pieceSale.multiply(buyNum);
-                BigDecimal weight = new BigDecimal(map.get("weight").toString());
-                BigDecimal subWeight = weight.multiply(buyNum);
-                BigDecimal subFreight = subWeight.multiply(userPerFreight).divide(new BigDecimal(2000));
-                map.put("sub_freight",subFreight);
-                map.put("sub_price",subProductPrice);
-                // 累加
-                productTotalPrice = productTotalPrice.add(subProductPrice).add(subFreight);
-            }
+            BigDecimal freight = new BigDecimal(map.get("freight").toString());
+            BigDecimal sub_price = price.multiply(num).multiply(price);
+            BigDecimal sub_freight = freight.multiply(num).multiply(distance);
+            map.put("sub_price",sub_price);
+            map.put("sub_freight",sub_freight);
+            productTotalPrice = productTotalPrice.add(sub_price).add(sub_freight);
         }
         return productTotalPrice;
     }
 
 
 
-    /**
-     * 只计算运费
-     * @param maps  （必须要有  buy_num 和 weight）
-     * @param charge
-     * @return
-     */
-//    public static Freight calTotalFreight(List<Map<String, Object>> maps, BigDecimal charge) {
-//        Freight freight = new Freight();
-//        BigDecimal totalWeight = new BigDecimal(0);
-//        BigDecimal totalFreight = new BigDecimal(0);
-//
-//        for (int i = 0; i < maps.size(); i++) {
-//            Map<String, Object> map = maps.get(i);
-//            BigDecimal num = new BigDecimal(map.get("buy_num").toString());
-//            BigDecimal weight = new BigDecimal(map.get("weight").toString());
-//            BigDecimal subFreight = num.multiply(weight).multiply(charge).divide(new BigDecimal(2000),DEF_DIV_SCALE,BigDecimal.ROUND_HALF_UP);
-//            totalFreight = totalFreight.add(subFreight);
-//            totalWeight = totalWeight.add(num.multiply(weight));
-//        }
-//        //一吨 = 2000 斤  totalWeight 是总斤数， charge代表 到达目的地 每吨多少钱。
-//        freight.setFreight(totalFreight.setScale(PIECE_SCALE,BigDecimal.ROUND_HALF_UP));
-//        freight.setWeight(totalWeight);
-//        return freight;
-//    }
+
+
 }

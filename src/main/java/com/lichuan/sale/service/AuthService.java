@@ -27,6 +27,8 @@ public class AuthService extends BaseService {
     public static final Permission P_User = new Permission(600L, "用户管理");
     public static final Permission P_Message = new Permission(700L,"消息管理");
     public static final Permission P_MessageCheck = new Permission(701L,"审批管理");
+    public static final Permission P_Order = new Permission(800L,"订单管理");
+    public static final Permission P_Order_ALL = new Permission(801L,"管理所有订单");
 
     public boolean hasPermission(Long role_id,Permission permission) {
         boolean hasPer = false;

@@ -148,4 +148,8 @@ public class UserService extends BaseService {
         int effect = userDao.updateUserCity(user_id,city);
         return effect > 0;
     }
+
+    public String getProxyId(Long user_id) {
+        return userDao.getProxyId(user_id);
+    }
 }
