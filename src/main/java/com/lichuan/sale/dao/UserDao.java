@@ -138,4 +138,14 @@ public class UserDao extends BaseDao{
         String id = jdbcTemplate.queryForObject(sql, new Object[]{user_id}, String.class);
         return id;
     }
+
+    public User getUserByToken(String token) {
+        String sql = "SELECT * from USER where token=?";
+        RowMapper<User> rowMap = new BeanPropertyRowMapper<User>(User.class);
+        List<User> users = jdbcTemplate.query(sql, new Object[]{token}, rowMap);
+        if (users.size() == 0) {
+            return null;
+        }
+        return users.get(0);
+    }
 }

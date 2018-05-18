@@ -25,6 +25,7 @@ public class AuthService extends BaseService {
     public static final Permission P_Dispatching = new Permission(400L, "配送管理");
     public static final Permission P_Power = new Permission(500L, "权限管理");
     public static final Permission P_User = new Permission(600L, "用户管理");
+    public static final Permission P_User_Manger = new Permission(601L, "管理所有用户");
     public static final Permission P_Message = new Permission(700L,"消息管理");
     public static final Permission P_MessageCheck = new Permission(701L,"审批管理");
     public static final Permission P_Order = new Permission(800L,"订单管理");

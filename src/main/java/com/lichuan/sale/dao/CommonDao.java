@@ -70,10 +70,10 @@ public class CommonDao {
     }
 
     @Transactional
-    public void updateRole(Long userId, String role_id, JSONArray groupJson) {
+    public void updatePermissions(Long userId, String role_id, JSONArray groupJson) {
         jdbcTemplate.update("delete from role_permission where role_id = ?",role_id);
         for (int i=0; i<groupJson.size(); i++){
-            Object permission_id = groupJson.getJSONObject(i).get("permission_id");
+            Object permission_id = groupJson.getJSONObject(i).get("id");
             jdbcTemplate.update("insert into role_permission (role_id,permission_id,update_uid) values (?,?,?)",role_id,permission_id,userId);
         }
     }

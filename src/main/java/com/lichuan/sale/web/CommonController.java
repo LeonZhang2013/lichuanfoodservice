@@ -116,12 +116,12 @@ public class CommonController extends BaseController {
 	 * @param permissions  json列表 {1,2,3}
 	 * @return
 	 */
-	@RequestMapping("updateRole")
-	public SingleResult<Object> updateRole(String role_id, String permissions) {
+	@RequestMapping("updatePermissions")
+	public SingleResult<Object> updatePermissions(String role_id, String permissions) {
 		SingleResult<Object> result = new SingleResult<>();
 		try {
 			JSONArray groupJson = JSON.parseArray(permissions);
-			commonService.updateRole(getUserId(),role_id, groupJson);
+			commonService.updatePermissions(getUserId(),role_id, groupJson);
 			result.setCode(Code.SUCCESS);
 			result.setMessage("更新成功");
 		} catch (Exception e) {

@@ -13,25 +13,29 @@ public class User {
     private String token;
     private String realname;
     private Integer sex;
-    /**
-     * 1：正常，2：冻结
-     */
     private Integer status;
-
     private Long parent_id;
-
     private Long role_id;
-
-    /**
-     * 默认地址
-     */
     private Long address_id;
-
-    /**
-     * 1：可多用户
-0：不可多用户
-     */
     private Integer is_multi;
+    private Long proxy_id;
+    private Long storeroom;
+
+    public Long getProxy_id() {
+        return proxy_id;
+    }
+
+    public void setProxy_id(Long proxy_id) {
+        this.proxy_id = proxy_id;
+    }
+
+    public Long getStoreroom() {
+        return storeroom;
+    }
+
+    public void setStoreroom(Long storeroom) {
+        this.storeroom = storeroom;
+    }
 
     public String getIcon() {
         return icon;

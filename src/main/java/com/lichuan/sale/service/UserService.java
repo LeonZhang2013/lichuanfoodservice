@@ -78,17 +78,20 @@ public class UserService extends BaseService {
     public MultiResult<Map<String, Object>> getUserList(
             Pager<Map<String, Object>> pager, User user, Long role_id, String key, Integer enable) {
 
-        MySql sql = new MySql("select u.*, r.name role_name,a.city,a.address,pu.realname ");
-        sql.append(" from user u, user pu,role r,user_address a ");
-        sql.append("where u.id= pu.parent_id and u.role_id = r.id and u.address_id = a.id ");
+        MySql sql = new MySql("select u.*, r.name role_name,a.city,a.address,u.realname ");
+        sql.append(" from user u, role r,user_address a ");
+        sql.append("where u.role_id = r.id and u.address_id = a.id ");
         sql.append("and r.level > (select level from role where id = ?) and u.role_id = ?");
+        if(!auth.hasPermission(user.getRole_id(),AuthService.P_User_Manger)){
+            sql.notNullAppend(" and u.proxy_id= ?", user.getId());
+        }
         sql.addValue(user.getRole_id());
         sql.addValue(role_id);
-        sql.notNullAppend(" and u.enable = ?", enable);
+        sql.notNullAppend(" and u.status = ?", enable);
         key = SQLTools.FuzzyKey(key);
         sql.notNullAppend(" and (u.mobile like ? or a.address like ? or u.nickname like ? or a.city like ? or u.realname like ?)",
                 key, key, key, key, key);
-        sql.orderBy("u.enable asc", "u.id desc");
+        sql.orderBy("u.status asc", "u.id desc");
         //long count = sql.getCount(jdbcTemplate);
         sql.limit(pager);
         MultiResult<Map<String, Object>> result = new MultiResult<>();
@@ -151,5 +154,9 @@ public class UserService extends BaseService {
 
     public String getProxyId(Long user_id) {
         return userDao.getProxyId(user_id);
+    }
+
+    public User getUserByToken(String token) {
+        return userDao.getUserByToken(token);
     }
 }

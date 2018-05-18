@@ -64,8 +64,8 @@ public class CommonService extends BaseService {
         return commonDao.getPermissions();
     }
 
-    public void updateRole(Long userId, String role_id, JSONArray groupJson) {
-        commonDao.updateRole(userId,role_id,groupJson);
+    public void updatePermissions(Long userId, String role_id, JSONArray groupJson) {
+        commonDao.updatePermissions(userId,role_id,groupJson);
     }
 
     public List<Map<String,Object>> getMyPermissions(String role_id) {
