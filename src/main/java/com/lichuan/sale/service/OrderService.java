@@ -71,7 +71,6 @@ public class OrderService extends BaseService{
         return totalPrice;
     }
 
-
     //检查重复提交(在30秒内，不能提交两次)
     private void checkRecommit(Long userId) throws Exception {
         String sql = "SELECT create_time FROM `user_order` where user_id = ? ORDER BY create_time DESC LIMIT 0,1";
