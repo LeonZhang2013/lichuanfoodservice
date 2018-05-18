@@ -34,4 +34,9 @@ public class ProductDao extends BaseDao{
         return jdbcTemplate.update(sqlInfo.getSql(), sqlInfo.getValues());
     }
 
+    public List<Map<String,Object>> getBannerList() {
+        String sql = "select * from product where promotion = 1";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
+        return maps;
+    }
 }

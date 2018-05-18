@@ -53,11 +53,7 @@ public class ProductService extends BaseService {
     }
 
 
-
-
-
-
-
-
-
+    public List<Map<String,Object>> getBannerList() {
+       return productDao.getBannerList();
+    }
 }

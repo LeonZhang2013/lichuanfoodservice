@@ -9,22 +9,22 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class BaseController {
 
     @Autowired
-    OrderService orderService;
+    public  OrderService orderService;
 
     @Autowired
-    ProductService productService;
+    public ProductService productService;
 
     @Autowired
-    UserService userService;
+    public UserService userService;
 
     @Autowired
-    protected AliYunService aliYunService;
+    public AliYunService aliYunService;
 
     @Autowired
-    protected CommonService commonService;
+    public CommonService commonService;
 
     @Autowired
-    ShopCartService shopCartService;
+    public ShopCartService shopCartService;
 
     public User getUser(){
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
