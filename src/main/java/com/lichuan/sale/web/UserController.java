@@ -26,7 +26,6 @@ public class UserController extends BaseController {
         try {
             if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
                 Map<String, Object> login = userService.login(username, password);
-                result.setCode(Code.SUCCESS);
                 result.setData(login);
                 result.setMessageOfSuccess("登陆成功");
             } else {

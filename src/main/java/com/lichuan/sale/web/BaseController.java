@@ -2,7 +2,9 @@ package com.lichuan.sale.web;
 
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.service.*;
+import com.lichuan.sale.service.wx.WxService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -25,6 +27,9 @@ public class BaseController {
 
     @Autowired
     public ShopCartService shopCartService;
+
+    @Autowired
+    public WxService wxService;
 
     public User getUser(){
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();

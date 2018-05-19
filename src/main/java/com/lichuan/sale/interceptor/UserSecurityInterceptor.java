@@ -27,6 +27,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
 
     static {
         pageList.add("login");
+        pageList.add("wx");
         pageList.add("test");
         pageList.add("register");
         pageList.add("getVerCode");

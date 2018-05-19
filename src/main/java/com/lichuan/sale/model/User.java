@@ -20,6 +20,15 @@ public class User {
     private Integer is_multi;
     private Long proxy_id;
     private Long storeroom;
+    private String xcx_id;
+
+    public String getXcx_id() {
+        return xcx_id;
+    }
+
+    public void setXcx_id(String xcx_id) {
+        this.xcx_id = xcx_id;
+    }
 
     public Long getProxy_id() {
         return proxy_id;

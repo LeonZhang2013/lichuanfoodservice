@@ -18,6 +18,7 @@ public class BaseService  {
     JdbcTemplate jdbcTemplate;
 
     @Autowired
+    public
     UserDao userDao;
 
     @Autowired

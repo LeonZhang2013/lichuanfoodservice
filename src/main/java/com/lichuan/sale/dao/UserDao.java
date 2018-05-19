@@ -1,5 +1,6 @@
 package com.lichuan.sale.dao;
 
+import com.lichuan.sale.configurer.RoleConstant;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.model.UserAddress;
@@ -147,5 +148,16 @@ public class UserDao extends BaseDao{
             return null;
         }
         return users.get(0);
+    }
+
+    public User getUserByXcxId(String openid) {
+        String sql = "SELECT * from USER where xcx_id=? ";
+        RowMapper<User> rowMap = new BeanPropertyRowMapper<User>(User.class);
+        List<User> users = jdbcTemplate.query(sql, new Object[]{openid}, rowMap);
+        if (users.size() == 0) {
+            return null;
+        }
+        return users.get(0);
+
     }
 }
