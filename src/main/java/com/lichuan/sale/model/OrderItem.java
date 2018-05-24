@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
 
-@Table(name = "user_order")
-public class UserOrder {
+@Table(name = "order_item")
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

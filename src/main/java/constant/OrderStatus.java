@@ -16,32 +16,20 @@ public enum OrderStatus {
     /**
      * 待付款
      */
-    WAIT_PAY(1, "待付款", "待付款"),
+    WAIT_PAY(0, "待付款", "待付款"),
 
     /**
      * 贷发货
      */
-    WAIT_SEND(2, "待发货", "待发货"),
-    /**
-     * 待发货
-     */
-    SEND(3, "已发货", "待收货"),
-    /**
-     * 待分配
-     */
-    DISTRIBUTION(4, "配送中", "完成"),
+    WAIT_RECEIVE(1, "待收货", "待收货"),
     /**
      *
      */
-    WAIT_OK(5, "待确认", "完成"),
-    /**
-     *
-     */
-    COMPLETE(6, "已完成", "完成"),
+    COMPLETE(3, "已完成", "已完成"),
     /**
      * 已取消
      */
-    CANCEL(0, "已取消", "已取消");
+    CANCEL(-1, "已取消", "已取消");
 
     private int status;
 
@@ -102,14 +90,8 @@ public enum OrderStatus {
     public OrderStatus next() {
         switch (this) {
             case WAIT_PAY:
-                return WAIT_SEND;
-            case WAIT_SEND:
-                return SEND;
-            case SEND:
-                return DISTRIBUTION;
-            case DISTRIBUTION:
-                return WAIT_OK;
-            case WAIT_OK:
+                return WAIT_RECEIVE;
+            case WAIT_RECEIVE:
                 return COMPLETE;
             default:
                 return CANCEL;

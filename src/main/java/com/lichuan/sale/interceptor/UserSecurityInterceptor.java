@@ -27,7 +27,6 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
 
     static {
         pageList.add("login");
-        pageList.add("wx");
         pageList.add("test");
         pageList.add("register");
         pageList.add("getVerCode");
@@ -35,6 +34,8 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         pageList.add("getArea");
         pageList.add("searchKey");
         pageList.add("listener");
+        pageList.add("getProducts");
+        pageList.add("getProductSaleNum");
     }
 
 

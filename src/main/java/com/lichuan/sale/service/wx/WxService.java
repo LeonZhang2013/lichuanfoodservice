@@ -8,6 +8,7 @@ import com.lichuan.sale.configurer.XCXInfo;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.service.BaseService;
 import com.lichuan.sale.tools.NetUtils;
+import com.lichuan.sale.tools.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,16 @@ public class WxService extends BaseService {
         map.put("openid", jsonObject.getString("openid"));
         map.put("session_key", jsonObject.getString("session_key"));
         User user = userDao.getUserByXcxId(jsonObject.getString("openid"));
-        if (user == null)  throw new Exception("该账户尚未登记注册");
+
+
+        if (user == null) {
+            throw new Exception("该账户尚未登记注册");
+        } else if (StringUtils.isNull(user.getToken())) {
+            String token = StringUtils.uuid();
+            userDao.updateToken(user.getId(), token);
+            user.setToken(token);
+
+        }
         return user;
     }
 }

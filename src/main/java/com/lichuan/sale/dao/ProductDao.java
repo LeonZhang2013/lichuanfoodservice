@@ -1,9 +1,12 @@
 package com.lichuan.sale.dao;
 
+import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.lichuan.sale.model.Product;
 import com.lichuan.sale.tools.SqlInfo;
+import com.lichuan.sale.tools.sqltools.MySql;
 import com.lichuan.sale.tools.sqltools.Pager;
 import com.lichuan.sale.tools.sqltools.SQLTools;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,17 +14,28 @@ import java.util.Map;
 
 @Repository
 public class ProductDao extends BaseDao{
-    public List<Map<String,Object>> getProductList(Pager<Map<String, Object>> pager, String categoryId, String keyword, Integer islist, Integer promotion) {
-        return null;
+    public List<Map<String,Object>> getProductList(Pager<Map<String, Object>> pager, String categoryId, String keyword, Integer status, Integer promotion) {
+        MySql sql = new MySql("SELECT p.*,c.name category_name from product p, category c WHERE c.id = p.category_id ");
+        sql.notNullAppend(" and p.category_id = ? ",categoryId);
+        sql.notNullAppend(" and p.status = ? ",status);
+        keyword = SQLTools.FuzzyKey(keyword);
+        sql.notNullAppend(" and (p.name like ? or p.subtitle like ?) ",keyword,keyword);
+        sql.notNullAppend(" and p.promotion = ? ",promotion);
+        sql.orderByDesc("p.id");
+        sql.limit(pager);
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql.toString(), sql.getValues());
+        return maps;
     }
 
     public List<Map<String, Object>> getUnit() {
         String sql = "select * from unit";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
+
         return maps;
     }
-    public List<Map<String,Object>> getCategory(Pager<Map<String, Object>> pager, String key, String categoryId, Integer islist) {
-        return null;
+    public List<Map<String,Object>> getCategory(Integer status) {
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList("SELECT * FROM `category` WHERE `status` = ?", new Object[]{status});
+        return maps;
     }
 
     public int updateProduct(Product product) {
@@ -35,8 +49,13 @@ public class ProductDao extends BaseDao{
     }
 
     public List<Map<String,Object>> getBannerList() {
-        String sql = "select * from product where promotion = 1";
+        String sql = "select * from product where promotion = 1  order by `update_time` DESC  limit 0,5";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
         return maps;
+    }
+
+    public int changeStatus(String id, String status) {
+        String sql = "update product set status = ? where id=?";
+        return jdbcTemplate.update(sql, status, id);
     }
 }

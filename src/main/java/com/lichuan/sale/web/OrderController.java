@@ -8,9 +8,7 @@ import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
 import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.Pager;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,8 +18,8 @@ import java.util.Map;
 @RequestMapping("order")
 public class OrderController extends BaseController{
 
-    @RequestMapping(value = "addOrder", method = RequestMethod.POST)
-    public synchronized SingleResult<String> addOrder(Long user_id, Long role_id, String comment, String address_id) {
+    @RequestMapping(value = "createOrder", method = RequestMethod.POST)
+    public synchronized SingleResult<String> addOrder(Long user_id, String remark, String address_id) {
         SingleResult<String> result = new SingleResult<>();
         result.setCode(Code.ERROR);
         try {
@@ -30,7 +28,7 @@ public class OrderController extends BaseController{
                 throw new CustomException("没有指定配送员");
             }
             Long order_id = Tools.generatorId();
-            BigDecimal totalPrice = orderService.addOrder(user_id,order_id,proxy_id);
+            BigDecimal totalPrice = orderService.createOrder(user_id,order_id,proxy_id,remark,address_id);
             String paymentInfo  = orderService.getPaymentInfo(order_id.toString(),totalPrice,"订单付款");
             result.setCode(Code.SUCCESS);
             result.setData(paymentInfo);
@@ -53,7 +51,7 @@ public class OrderController extends BaseController{
         return result;
     }
 
-    @RequestMapping(value = "getOrderList", method = RequestMethod.GET)
+    @GetMapping("getOrderList")
     public MultiResult<Map<String, Object>> getOrderList(Integer status, String key, Pager<Map<String, Object>> pager) {
         MultiResult<Map<String, Object>> result = new MultiResult<>();
         try {
@@ -65,6 +63,44 @@ public class OrderController extends BaseController{
         }
         return result;
     }
+
+    @GetMapping("getWxOrderList")
+    public MultiResult<Map<String, Object>> getWxOrderList(Integer status, Pager<Map<String, Object>> pager) {
+        MultiResult<Map<String, Object>> result = new MultiResult<>();
+        try {
+            List<Map<String, Object>> data = orderService.getWxOrderList(status, pager, getUserId());
+            result.setMessageOfSuccess();
+            result.setData(data);
+        } catch (Exception e) {
+            result.setMessageOfError(e.getMessage());
+        }
+        return result;
+    }
+
+
+    @GetMapping("getProductSaleNum")
+    public SingleResult<Object> getProductSaleNum(Long product_id){
+        SingleResult<Object> result = new SingleResult<>();
+        try {
+            if (null != product_id) {
+                Map<String, Object> productSaleNum = orderService.getProductSaleNum(product_id);
+                result.setCode(Code.SUCCESS);
+                result.setData(productSaleNum);
+            } else {
+                result.setCode(Code.EXP_PARAM);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setCode(Code.ERROR);
+        }
+        return result;
+
+
+    }
+
+
+
+
 
 
     @RequestMapping(value = "getOrderDetail", method = RequestMethod.GET)

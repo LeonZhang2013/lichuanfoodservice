@@ -32,4 +32,7 @@ public class WxProductController extends BaseController{
         return result;
     }
 
+
+
+
 }

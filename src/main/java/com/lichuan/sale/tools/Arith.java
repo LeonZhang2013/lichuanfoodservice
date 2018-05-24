@@ -2,6 +2,7 @@ package com.lichuan.sale.tools;
 
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -147,26 +148,31 @@ public final class Arith{
 
 
     /**
-     * 计算商品价格   仅仅用于  提交订单之前。
-     * @param maps 商品 （price，num，other_charge）
-     * @param  distanceL  距离基数
-     * @return 返回商品总价（包含杂费和利润点，不包含运费）。
+     * 计算运费 和 商品总价
+     * @param distanceStr
+     * @param cart
+     * @return
      */
-    public static BigDecimal calShopCartPrice(List<Map<String, Object>> maps, Long distanceL) {
-        BigDecimal productTotalPrice = new BigDecimal(0);
-        BigDecimal distance = new BigDecimal(distanceL);
-        for (int i=0; i<maps.size(); i++){
-            Map<String, Object> map = maps.get(i);
-            BigDecimal price = new BigDecimal(map.get("price").toString());
-            BigDecimal num = new BigDecimal(map.get("num").toString());
-            BigDecimal freight = new BigDecimal(map.get("freight").toString());
-            BigDecimal sub_price = price.multiply(num).multiply(price);
+    public static Map<String,Object> calculationCharge(String distanceStr, List<Map<String, Object>> cart) {
+        BigDecimal distance = new BigDecimal(distanceStr);
+        BigDecimal totalGoodsPrice = new BigDecimal(0);
+        BigDecimal totalFreight = new BigDecimal(0);
+        for (int i=0; i<cart.size(); i++){
+            BigDecimal price = new BigDecimal(cart.get(i).get("price").toString());
+            BigDecimal num = new BigDecimal(cart.get(i).get("num").toString());
+            BigDecimal freight = new BigDecimal(cart.get(i).get("freight").toString());
             BigDecimal sub_freight = freight.multiply(num).multiply(distance);
-            map.put("sub_price",sub_price);
-            map.put("sub_freight",sub_freight);
-            productTotalPrice = productTotalPrice.add(sub_price).add(sub_freight);
+            BigDecimal sub_price = price.multiply(num);
+            cart.get(i).put("sub_freight",sub_freight);
+            cart.get(i).put("sub_price",sub_price);
+            totalGoodsPrice = totalGoodsPrice.add(sub_price);
+            totalFreight = totalFreight.add(sub_freight);
         }
-        return productTotalPrice;
+        Map<String,Object> charge = new HashMap<>();
+        charge.put("totalGoodsPrice",totalGoodsPrice);
+        charge.put("totalFreight",totalFreight);
+        charge.put("totalPrice",totalFreight.add(totalGoodsPrice));
+        return charge;
     }
 
 

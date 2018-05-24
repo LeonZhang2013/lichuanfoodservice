@@ -1,6 +1,9 @@
 package com.lichuan.sale.web;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.lichuan.sale.core.CustomException;
+import com.lichuan.sale.model.ShopCart;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
@@ -38,16 +41,22 @@ public class ShopCartController extends BaseController{
         return result;
     }
 
-    @PostMapping("addShopCart")
-    public SingleResult<Long> addShopcart(Long user_id, Long product_id, Integer num) {
-        SingleResult<Long> result = new SingleResult<>();
+    /**
+     * 添加商品
+     * @param user_id
+     * @param product_id
+     * @param num
+     * @return
+     */
+    @PostMapping("addGoodsToCart")
+    public SingleResult<Integer> addGoodsToCart(Long user_id, Long product_id, Integer num) {
+        SingleResult<Integer> result = new SingleResult<>();
         try {
-            if (null != user_id && null != product_id && null != num) {
-                int effect = shopCartService.addShopCart(user_id, product_id, num);
-                if (effect == 0) throw new CustomException("添加失败");
+            if (null != product_id && null != num) {
+                if(user_id==null) user_id= getUserId();
+                Integer count = shopCartService.addShopCart(user_id, product_id, num);
                 result.setCode(Code.SUCCESS);
-            } else {
-                result.setCode(Code.EXP_PARAM);
+                result.setData(count);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +80,25 @@ public class ShopCartController extends BaseController{
         } catch (Exception e) {
             e.printStackTrace();
             result.setCode(Code.ERROR);
+        }
+        return result;
+    }
+
+
+    @PostMapping("saveCart")
+    public SingleResult saveCart(String carts){
+        SingleResult<String> result = new SingleResult<>();
+        try {
+            if (null != carts ) {
+                List<ShopCart> arras = JSON.parseArray(carts,ShopCart.class);
+                shopCartService.saveCartList(arras,getUserId());
+                result.setCode(Code.SUCCESS);
+            } else {
+                result.setCode(Code.EXP_PARAM);
+            }
+        } catch (Exception e) {
+            result.setCode(Code.ERROR);
+            result.setMessage(e.getMessage());
         }
         return result;
     }
@@ -159,18 +187,7 @@ public class ShopCartController extends BaseController{
         return result;
     }
 
-    @RequestMapping(value = "batchCommitCart", method = RequestMethod.POST)
-    public MultiResult<Map<String, Object>> batchCommitCart(String user_id, String carts) {
-        MultiResult<Map<String, Object>> result = new MultiResult<>();
-        try {
-            shopCartService.batchSaveCart(user_id, carts);
-            result.setCode(Code.SUCCESS);
-        } catch (Exception e) {
-            result.setCode(Code.ERROR);
-            result.setMessage(e.getMessage());
-        }
-        return result;
-    }
+
 
 
 }

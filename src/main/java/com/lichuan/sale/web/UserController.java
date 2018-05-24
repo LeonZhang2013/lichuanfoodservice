@@ -4,12 +4,15 @@ import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.model.UserAddress;
 import com.lichuan.sale.result.Code;
+import com.lichuan.sale.result.MapResult;
 import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
+import com.lichuan.sale.tools.Arith;
 import com.lichuan.sale.tools.StringUtils;
 import com.lichuan.sale.tools.sqltools.Pager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,7 +42,7 @@ public class UserController extends BaseController {
 
 
     @PostMapping("register")
-    public SingleResult<String> register(User user, UserAddress userAddress,String vercode) {
+    public SingleResult<String> register(User user, UserAddress userAddress, String vercode) {
         SingleResult<String> result = new SingleResult<>();
         try {
             if (commonService.verCode(user.getMobile(), vercode)) {
@@ -47,7 +50,7 @@ public class UserController extends BaseController {
                 user.setUsername(user.getMobile());
                 userService.addUser(user, userAddress);
                 result.setMessageOfSuccess("注册用户成功");
-            }else {
+            } else {
                 result.setCode(Code.ERROR);
                 result.setMessage("验证码有误");
             }
@@ -83,6 +86,23 @@ public class UserController extends BaseController {
         return result;
     }
 
+    @PostMapping("getMyAddressAndFreight")
+    public MapResult getMyFright() {
+        MapResult result = new MapResult();
+        try {
+            Map<String, Object> addressAndDistance = userService.addressAndDistance(getUserId());
+            List<Map<String, Object>> wxShopCartList = shopCartService.getWxShopCartList(getUserId());
+            Map<String, Object> charge = Arith.calculationCharge(addressAndDistance.get("distance").toString(), wxShopCartList);
+            result.setCode(Code.SUCCESS);
+            result.put("address", addressAndDistance);
+            result.put("cart", wxShopCartList);
+            result.put("charge", charge);
+        } catch (CustomException e) {
+            result.setMessageOfError(e.getMessage());
+        }
+        return result;
+    }
+
 
     @PostMapping("updateRole")
     public SingleResult<Object> updateRole(String user_id, Integer role_id) {
@@ -91,7 +111,7 @@ public class UserController extends BaseController {
             boolean isOk = userService.updateRole(user_id, role_id);
             if (isOk) {
                 result.setMessageOfSuccess("授权成功");
-            }else {
+            } else {
                 result.setMessageOfError("授权失败");
             }
         } catch (Exception e) {
@@ -107,7 +127,7 @@ public class UserController extends BaseController {
             boolean isOk = userService.updateParentId(user_id, parent_id);
             if (isOk) {
                 result.setMessageOfSuccess("修改成功");
-            }else{
+            } else {
                 result.setMessageOfError("修改失败");
             }
         } catch (Exception e) {
@@ -120,12 +140,8 @@ public class UserController extends BaseController {
     public SingleResult<Object> updateState(String user_id, String state) {
         SingleResult<Object> result = new SingleResult<Object>();
         try {
-            boolean isOk = userService.updateState(user_id, state);
-            if (isOk) {
-                result.setMessageOfSuccess("修改成功");
-            }else{
-                result.setMessageOfError("修改失败");
-            }
+            userService.updateState(user_id, state);
+            result.setMessageOfSuccess("修改成功");
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }
@@ -135,10 +151,10 @@ public class UserController extends BaseController {
     @RequestMapping(value = "updateMultiLogin", method = RequestMethod.POST)
     public SingleResult<String> updateMultiLogin(Integer multi) {
         SingleResult<String> result = new SingleResult<>();
-        result.setCode(Code.ERROR);
         try {
-            boolean isOk = userService.updateMultiLogin(getUserId(), multi);
-            if (isOk) result.setCode(Code.SUCCESS);
+            if (multi == null || multi > 2) throw new CustomException("参数异常");
+            userService.updateMultiLogin(getUserId(), multi);
+            result.setCode(Code.SUCCESS);
         } catch (Exception e) {
             result.setMessage(e.getMessage());
         }
@@ -151,8 +167,7 @@ public class UserController extends BaseController {
         SingleResult<String> result = new SingleResult<>();
         try {
             if (commonService.verCode(mobile, vercode)) {
-                boolean b = userService.updatePwd(mobile, newPwd);
-                if(b) throw new CustomException("修改密码出错");
+                userService.updatePwd(mobile, newPwd);
                 result.setMessageOfSuccess("修改成功");
             } else {
                 result.setMessageOfError("验证码有误");
@@ -168,7 +183,8 @@ public class UserController extends BaseController {
     public SingleResult<Object> updateAddress(String user_id, String address) {
         SingleResult<Object> result = new SingleResult<Object>();
         try {
-            boolean b = userService.updateAddress(user_id, address);
+            userService.updateAddress(user_id, address);
+            result.setMessageOfSuccess("修改成功");
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }
@@ -179,12 +195,8 @@ public class UserController extends BaseController {
     public SingleResult<Object> updateUserCity(String user_id, String city) {
         SingleResult<Object> result = new SingleResult<Object>();
         try {
-            boolean isOk = userService.updateUserCity(user_id, city);
-            if (isOk) {
-                result.setMessageOfSuccess("修改成功");
-            }else{
-                result.setMessageOfError("修改失败");
-            }
+            userService.updateUserCity(user_id, city);
+            result.setMessageOfSuccess("修改成功");
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }

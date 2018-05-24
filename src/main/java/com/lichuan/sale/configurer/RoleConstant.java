@@ -3,5 +3,5 @@ package com.lichuan.sale.configurer;
 public class RoleConstant {
 
 
-    public static Object USER_ID = 1000;
+    public static long USER_ID = 1000;
 }

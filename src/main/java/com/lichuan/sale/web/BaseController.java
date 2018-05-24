@@ -20,6 +20,9 @@ public class BaseController {
     public UserService userService;
 
     @Autowired
+    public DeliverService deliverService;
+
+    @Autowired
     public AliYunService aliYunService;
 
     @Autowired

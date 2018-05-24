@@ -1,11 +1,10 @@
 package com.lichuan.sale.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.lichuan.sale.configurer.RoleConstant;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.Role;
 import com.lichuan.sale.model.Version;
-import com.lichuan.sale.result.Code;
-import com.lichuan.sale.result.MultiResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -70,5 +69,9 @@ public class CommonService extends BaseService {
 
     public List<Map<String,Object>> getMyPermissions(String role_id) {
         return commonDao.getMyPermissions(role_id);
+    }
+
+    public Map<String,Object> getNoticeOfwx() {
+        return commonDao.getNoticeOfClient();
     }
 }

@@ -59,8 +59,14 @@ public class CommonDao {
         return roleList.get(0);
     }
 
-    public Map<String, Object> getNotice() {
-        String sql = "select * from notice where isShow = 1 order by id desc";
+    public Map<String, Object> getNoticeOfService() {
+        String sql = "select * from notice where isShow = 1 and type= 0 order by id desc limit 0,1";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
+        return maps.size() > 0 ? maps.get(0) : null;
+    }
+
+    public Map<String,Object> getNoticeOfClient() {
+        String sql = "select * from notice where isShow = 1 and type= 1 order by id desc limit 0,1";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
         return maps.size() > 0 ? maps.get(0) : null;
     }
@@ -86,4 +92,7 @@ public class CommonDao {
     public List<Map<String,Object>> getArea(Long parentId) {
         return jdbcTemplate.queryForList("select * from area where enable=1 and parent_id = ?",parentId);
     }
+
+
+
 }

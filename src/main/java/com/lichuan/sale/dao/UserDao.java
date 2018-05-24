@@ -43,14 +43,13 @@ public class UserDao extends BaseDao{
     }
 
     public Long addUser(User user) {
-        user.setId(Tools.generatorId());
         SqlInfo sqlInfo = SQLTools.getInsertSQL(user);
         jdbcTemplate.update(sqlInfo.getSql(), sqlInfo.getValues());
         return user.getId();
     }
 
     public Long addAddress(UserAddress userAddress) {
-        userAddress.setId(Tools.generatorId());
+        if(userAddress.getId()==null)userAddress.setId(Tools.generatorId());
         SqlInfo sqlInfo = SQLTools.getInsertSQL(userAddress,"user_address");
         jdbcTemplate.update(sqlInfo.getSql(), sqlInfo.getValues());
         return userAddress.getId();
@@ -86,7 +85,7 @@ public class UserDao extends BaseDao{
     }
 
     public int updateUserState(String user_id, String state) {
-        String sql = "update user set enable=? where id = ?";
+        String sql = "update user set status=? where id = ?";
         int effect = jdbcTemplate.update(sql, state, user_id);
         return effect;
 
@@ -158,6 +157,15 @@ public class UserDao extends BaseDao{
             return null;
         }
         return users.get(0);
+
+    }
+
+    public Map<String, Object> addressAndDistance(Long userId) throws CustomException {
+        String sql = "select ua.*,distance FROM `storeroom` s,`user` u,`user` p,user_address ua " +
+                " WHERE u.id = ? and u.proxy_id = p.id and p.storeroom_id =s.id and ua.user_id = u.id";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, userId);
+        if(maps.size()==0) throw new CustomException("没有关联业务员");
+        return maps.get(0);
 
     }
 }

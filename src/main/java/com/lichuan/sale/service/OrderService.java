@@ -19,16 +19,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
-public class OrderService extends BaseService{
+public class OrderService extends BaseService {
 
 
     @Transactional
-    public BigDecimal addOrder(Long user_id, Long order_id, String proxy_id) throws Exception {
+    public BigDecimal createOrder(Long user_id, Long order_id, String proxy_id, String remark, String address_id) throws Exception {
         checkRecommit(user_id);
         //获取购物车商品信息和数量
         List<Map<String, Object>> userCart = shopCartDao.getUserCart(user_id);
@@ -37,29 +35,34 @@ public class OrderService extends BaseService{
         String sql = "SELECT distance FROM storeroom s, user p where s.id = p.storeroom_id and p.id = ?";
         Long distance = jdbcTemplate.queryForObject(sql, new Object[]{proxy_id}, Long.class);
 
-        BigDecimal totalPrice = Arith.calShopCartPrice(userCart, distance);
+        BigDecimal totalPrice = (BigDecimal) Arith.calculationCharge(distance.toString(), userCart).get("totalPrice");
+
+        int waitPay = OrderStatus.WAIT_PAY.getStatus();
+        String orderSql = "INSERT INTO `order_` (`id`,`user_id`,`pay_status`,`address_id`,`total_price`,`remark`) values(?,?,?,?,?,?)";
+        int update = jdbcTemplate.update(orderSql, order_id, user_id, waitPay, address_id, totalPrice, remark);
+        if (update == 0) throw new CustomException("创建订单失败");
 
         MySql mySql = new MySql();
-        mySql.append("INSERT INTO `user_order`(`user_id`,`product_id`,`payment_type`,`piece_price`,");
-        mySql.append("`sub_freight`,`sub_price`,`order_status`,`buy_num`,`product_image`,`product_name`,`product_unit`,`order_id`,`proxy_id`)");
-        mySql.append(" values(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        mySql.append("INSERT INTO `order_item`(`user_id`,`product_id`,`piece_price`,`sub_freight`,`sub_price`,");
+        mySql.append("`status`,`buy_num`,`product_image`,`product_name`,`product_unit`,`order_id`,`proxy_id`)");
+        mySql.append(" values(?,?,?,?,?,?,?,?,?,?,?,?)");
         int[] ints = jdbcTemplate.batchUpdate(mySql.toString(), new BatchPreparedStatementSetter() {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Map<String, Object> item = userCart.get(i);
-                ps.setString(1, user_id.toString());
-                ps.setString(2, item.get("product_id").toString());
-                ps.setString(3, item.get("payment_type").toString());
-                ps.setString(4, item.get("piece_price").toString());
-                ps.setString(5, item.get("sub_freight").toString());
-                ps.setString(6, item.get("sub_price").toString());
-                ps.setString(7, OrderStatus.WAIT_PAY.getStatus() + "");
-                ps.setString(8, item.get("buy_num").toString());
-                ps.setString(9, item.get("main_image").toString());
-                ps.setString(10, item.get("name").toString());
-                ps.setString(11, item.get("unit").toString());
-                ps.setString(12, order_id.toString());
-                ps.setString(13, proxy_id);
+                ps.setObject(1, user_id);
+                ps.setObject(2, item.get("id"));
+                ps.setObject(3, item.get("price"));
+                ps.setObject(4, item.get("sub_freight").toString());
+                ps.setObject(5, item.get("sub_price").toString());
+                ps.setObject(6, waitPay);
+                ps.setObject(7, item.get("num"));
+                ps.setObject(8, item.get("main_image"));
+                ps.setObject(9, item.get("name"));
+                ps.setObject(10, item.get("unit"));
+                ps.setObject(11, order_id);
+                ps.setObject(12, proxy_id);
             }
+
             public int getBatchSize() {
                 return userCart.size();
             }
@@ -68,12 +71,13 @@ public class OrderService extends BaseService{
         String sqlDel = "delete from shop_cart where user_id = ?";
         int effect = jdbcTemplate.update(sqlDel, user_id);
         if (effect == 0) throw new CustomException("清空购物车失败");
+
         return totalPrice;
     }
 
     //检查重复提交(在30秒内，不能提交两次)
     private void checkRecommit(Long userId) throws Exception {
-        String sql = "SELECT create_time FROM `user_order` where user_id = ? ORDER BY create_time DESC LIMIT 0,1";
+        String sql = "SELECT create_time FROM `order_item` where user_id = ? ORDER BY create_time DESC LIMIT 0,1";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, userId);
         if (maps.size() > 0) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -95,13 +99,44 @@ public class OrderService extends BaseService{
         return data;
     }
 
-    public List<Map<String,Object>> getOrderList(Integer status, String key, Pager<Map<String, Object>> pager, User user) {
+
+    public List<Map<String, Object>> getWxOrderList(Integer status, Pager<Map<String, Object>> pager, Long userId) {
         MySql mySql = new MySql();
-        mySql.append(" SELECT o.id sub_id,u.id user_id,o.order_id id,o.order_status ,u.realname, a.mobile ,a.city,a.address,os.name status_name,");
+        mySql.append("SELECT i.*,o.total_price,o.remark FROM `order_` o,`order_item` i,`order_status` s ");
+        mySql.append("WHERE o.id = i.order_id and i.status = s.id and i.user_id=? and i.status = ?");
+        mySql.orderByDesc("o.create_time");
+        mySql.limit(pager);
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(mySql.toString(), userId,status);
+        List<Map<String,Object>> data = new ArrayList<>();
+        boolean hasAdd;
+        for (int i = 0; i < result.size(); i++) {
+            Map<String, Object> item_s = result.get(i);
+            hasAdd = false;
+            for (int j=0; j<data.size(); j++){
+                if(item_s.get("order_id").toString().equals(data.get(j).get("order_id").toString())){
+                    List<Object> images = (List<Object>) data.get(j).get("images");
+                    images.add(item_s.get("product_image"));
+                    hasAdd = true;
+                    break;
+                }
+            }
+            if(!hasAdd){
+                List<Object>  images = new ArrayList<>();
+                images.add(item_s.remove("product_image"));
+                item_s.put("images",images);
+                data.add(item_s);
+            }
+        }
+        return data;
+    }
+
+    public List<Map<String, Object>> getOrderList(Integer status, String key, Pager<Map<String, Object>> pager, User user) {
+        MySql mySql = new MySql();
+        mySql.append(" SELECT o.id sub_id,u.id user_id,o.order_id id,o.status ,u.realname,o.product_unit, a.mobile ,oo.remark,a.city,a.address,os.name status_name,");
         mySql.append("SUM(o.sub_price) `product_total_price`,SUM(o.buy_num) buy_num,SUM(o.sub_freight) total_freight,o.create_time  ");
-        mySql.append(" FROM `user` u,`user_order` o,user_address a ,order_status os ");
-        mySql.append(" WHERE u.id = o.user_id and a.user_id = u.id and os.id = o.order_status ");
-        mySql.notNullAppend("  and o.order_status = ? ", status);
+        mySql.append(" FROM `user` u,`order_item` o,order_ oo,user_address a ,order_status os ");
+        mySql.append(" WHERE u.id = o.user_id and a.user_id = u.id and os.id = o.status and oo.id = o.order_id ");
+        mySql.notNullAppend("  and o.status = ? ", status);
         key = SQLTools.FuzzyKey(key);
         mySql.notNullAppend(" and (o.order_id like ? or u.realname like ?) ", key, key);
         //如果有管理订单的功能查询多订单，跳过括号内的sql 判断
@@ -117,14 +152,7 @@ public class OrderService extends BaseService{
             order.put("create_time", Tools.priseTimestamp((Timestamp) order.get("create_time")));
             if (auth.hasPermission(user.getRole_id(), auth.P_Dispatching)) {//有权限
                 switch (OrderStatus.getOrderStatus(status)) {
-                    case WAIT_PAY:
-                    case DISTRIBUTION:
-                        order.put("oper_status", "true");
-                }
-            }
-            if (user.getId().toString().equals(order.get("user_id").toString())) {
-                switch (OrderStatus.getOrderStatus(status)) {
-                    case WAIT_OK:
+                    case WAIT_RECEIVE:
                         order.put("oper_status", "true");
                 }
             }
@@ -137,25 +165,29 @@ public class OrderService extends BaseService{
         return data;
     }
 
-    public List<Map<String,Object>> getOrderDetail(Long order_id, Integer status) {
+    public List<Map<String, Object>> getOrderDetail(Long order_id, Integer status) {
         MySql mySql = new MySql();
         mySql.append("select o.*,os.name status_name ");
-        mySql.append("from user_order o,`product` p,order_status os");
-        mySql.append("where os.id = o.order_status ");
+        mySql.append("from order_item o,`product` p,order_status os");
+        mySql.append("where os.id = o.status ");
         mySql.append("and o.order_id = ?");
         mySql.addValue(order_id);
-        mySql.notNullAppend("and o.order_status = ?", status);
+        mySql.notNullAppend("and o.status = ?", status);
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(mySql.toString(), mySql.getValues());
         return maps;
     }
 
     public void operateOrder(Long orderId, Integer status) throws CustomException {
         int effect = orderDao.operateOrder(orderId, status);
-        if(effect == 0) throw new CustomException("操作失败");
+        if (effect == 0) throw new CustomException("操作失败");
     }
 
     public void cancelOrder(Long order_id, Long user_id) throws CustomException {
-        int effect = orderDao.cancelOrder(order_id,user_id);
-        if(effect == 0) throw new CustomException("只能操作自己订单");
+        int effect = orderDao.cancelOrder(order_id, user_id);
+        if (effect == 0) throw new CustomException("只能操作自己订单");
+    }
+
+    public Map<String,Object> getProductSaleNum(Long product_id) {
+        return orderDao.getProductSaleNum(product_id);
     }
 }

@@ -1,13 +1,11 @@
 package com.lichuan.sale.service;
 
 import com.lichuan.sale.core.CustomException;
-import com.lichuan.sale.model.Permission;
 import com.lichuan.sale.model.Role;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.model.UserAddress;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.MultiResult;
-import com.lichuan.sale.result.SingleResult;
 import com.lichuan.sale.tools.StringUtils;
 import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.MySql;
@@ -43,12 +41,14 @@ public class UserService extends BaseService {
                 user.setToken(token);
             }
             List<Map<String, Object>> permissionList = userDao.getPermissionByRoleId(user.getRole_id());
-            Map<String, Object> notice = commonDao.getNotice();
+            Map<String, Object> notice = commonDao.getNoticeOfService();
+            Map<String, Object> address = userDao.getAddress(user.getAddress_id().toString());
 
             data.put("permission", permissionList);
             data.put("user", user);
             data.put("roleList", role);
             data.put("notice", notice);
+            data.put("address", address);
         } catch (Exception e) {
             throw new CustomException(e.getMessage());
         }
@@ -62,9 +62,14 @@ public class UserService extends BaseService {
 
         String encryptPass = Tools.encryptPass(user.getUsername(), user.getPassword());
         user.setPassword(encryptPass);
-        Long id = userDao.addUser(user);
+        Long id = Tools.generatorId();//初始化时，用户和地址公用一个id
+        user.setId(id);
+        user.setAddress_id(id);
+        userAddress.setId(id);
         userAddress.setUser_id(id);
+
         userDao.addAddress(userAddress);
+        userDao.addUser(user);
     }
 
     public Map<String, Object> getAddress(String address_id) throws CustomException {
@@ -118,9 +123,9 @@ public class UserService extends BaseService {
         return effect > 0;
     }
 
-    public boolean updateState(String user_id, String state) {
+    public void updateState(String user_id, String state) throws CustomException {
         int effect = userDao.updateUserState(user_id, state);
-        return effect > 0;
+        if(effect == 0) throw  new CustomException("修改失败");
     }
 
     public boolean updateMultiLogin(Long userId, Integer multi) {
@@ -129,10 +134,10 @@ public class UserService extends BaseService {
     }
 
     @Transactional
-    public boolean updatePwd(String mobile, String newPwd) throws Exception {
+    public void updatePwd(String mobile, String newPwd) throws Exception {
         if (!StringUtils.isNotBlank(newPwd)) throw new CustomException("密码不能为空");
         int effect = userDao.updateUserPwd(mobile, newPwd);
-        return effect > 0;
+        if(effect == 0) throw new CustomException("修改密码出错");
     }
 
     public void phoneHasEixst(String phone) throws CustomException {
@@ -142,14 +147,14 @@ public class UserService extends BaseService {
         }
     }
 
-    public boolean updateAddress(String user_id,String address) {
+    public void updateAddress(String user_id,String address) throws CustomException {
         int effect = userDao.updateUserAddress(user_id,address);
-        return effect > 0;
+        if(effect == 0)throw  new CustomException("修改失败");
     }
 
-    public boolean updateUserCity(String user_id,String city) {
+    public void updateUserCity(String user_id,String city) throws CustomException {
         int effect = userDao.updateUserCity(user_id,city);
-        return effect > 0;
+        if(effect == 0)throw  new CustomException("修改失败");
     }
 
     public String getProxyId(Long user_id) {
@@ -158,5 +163,9 @@ public class UserService extends BaseService {
 
     public User getUserByToken(String token) {
         return userDao.getUserByToken(token);
+    }
+
+    public Map<String,Object> addressAndDistance(Long userId) throws CustomException {
+        return userDao.addressAndDistance(userId);
     }
 }

@@ -133,13 +133,26 @@ public class CommonController extends BaseController {
 
 
 	/**
-	 * 检查更新
-	 * @param code
+	 *  获取公告
+
 	 * @return
 	 * @throws Exception
 	 */
+	@RequestMapping("getNotice")
+	public SingleResult<Object> getNotice(){
+		SingleResult<Object> result = new SingleResult<>();
+		try {
+			Map<String,Object> data = commonService.getNoticeOfwx();
+			result.setCode(Code.SUCCESS);
+			result.setData(data);
+		} catch (Exception e) {
+			result.setMessageOfError(e.getMessage());
+		}
+		return result;
+	}
+
 	@RequestMapping("checkVersion")
-	public SingleResult<Object> checkVersion(Integer code,String packageName){
+	public SingleResult<Object> getNotice(Integer code,String packageName){
 		SingleResult<Object> result = new SingleResult<>();
 		try {
 			Version version = commonService.checkVersion(code,packageName);

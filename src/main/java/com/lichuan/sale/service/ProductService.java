@@ -26,8 +26,8 @@ public class ProductService extends BaseService {
 
 
 
-    public List<Map<String,Object>> getProductList(Pager<Map<String, Object>> pager, String categoryId, String keyword, Integer islist, Integer promotion) {
-        List<Map<String, Object>> productList = productDao.getProductList(pager, categoryId, keyword, islist, promotion);
+    public List<Map<String,Object>> getProductList(Pager<Map<String, Object>> pager, String categoryId, String keyword, Integer status, Integer promotion) {
+        List<Map<String, Object>> productList = productDao.getProductList(pager, categoryId, keyword, status, promotion);
         return productList;
     }
 
@@ -35,8 +35,8 @@ public class ProductService extends BaseService {
         return productDao.getUnit();
     }
 
-    public List<Map<String,Object>> getCategory(Pager<Map<String, Object>> pager, String key, String categoryId, Integer islist) {
-        return productDao.getCategory(pager,key,categoryId,islist);
+    public List<Map<String,Object>> getCategory(Integer status) {
+        return productDao.getCategory(status);
     }
 
     public int updateProduct(Product product) {
@@ -55,5 +55,10 @@ public class ProductService extends BaseService {
 
     public List<Map<String,Object>> getBannerList() {
        return productDao.getBannerList();
+    }
+
+    public void changeStatus(String id, String status) throws CustomException {
+        int effect = productDao.changeStatus(id, status);
+        if (effect == 0) throw new CustomException("更新失败更新失败");
     }
 }
