@@ -4,23 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.ShopCart;
-import com.lichuan.sale.result.Code;
-import com.lichuan.sale.result.MultiResult;
-import com.lichuan.sale.result.SingleResult;
-import com.lichuan.sale.tools.Arith;
-import com.lichuan.sale.tools.sqltools.MySql;
-import com.sun.org.apache.bcel.internal.generic.InstructionList;
-import constant.OrderStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.parser.Entity;
-import java.beans.Transient;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

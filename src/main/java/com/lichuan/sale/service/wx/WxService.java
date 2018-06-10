@@ -5,13 +5,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lichuan.sale.configurer.RoleConstant;
 import com.lichuan.sale.configurer.XCXInfo;
+import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.User;
+import com.lichuan.sale.model.UserAddress;
 import com.lichuan.sale.service.BaseService;
 import com.lichuan.sale.tools.NetUtils;
 import com.lichuan.sale.tools.StringUtils;
+import com.lichuan.sale.tools.Tools;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,5 +53,20 @@ public class WxService extends BaseService {
 
         }
         return user;
+    }
+
+    public List<Map<String,Object>> getSaler(String storageId) throws CustomException {
+       return userDao.getProxyByStorageId(storageId);
+    }
+
+    @Transactional
+    public void addUser(User user, UserAddress userAddress) {
+        userAddress.setName(user.getRealname());
+        user.setUsername(user.getMobile());
+        Long id = Tools.generatorId();
+        user.setId(id);
+        userAddress.setUser_id(id);
+        userDao.addUser(user);
+        userDao.addAddress(userAddress);
     }
 }

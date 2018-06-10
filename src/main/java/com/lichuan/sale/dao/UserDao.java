@@ -84,9 +84,9 @@ public class UserDao extends BaseDao{
         return effect ;
     }
 
-    public int updateUserState(String user_id, String state) {
-        String sql = "update user set status=? where id = ?";
-        int effect = jdbcTemplate.update(sql, state, user_id);
+    public int updateUserStatus(String user_id, String status) {
+        String sql = "update user set status_=? where id = ?";
+        int effect = jdbcTemplate.update(sql, status, user_id);
         return effect;
 
     }
@@ -161,11 +161,18 @@ public class UserDao extends BaseDao{
     }
 
     public Map<String, Object> addressAndDistance(Long userId) throws CustomException {
-        String sql = "select ua.*,distance FROM `storeroom` s,`user` u,`user` p,user_address ua " +
-                " WHERE u.id = ? and u.proxy_id = p.id and p.storeroom_id =s.id and ua.user_id = u.id";
+        String sql = "select ua.*,distance FROM `storage` s,`user` u,`user` p,user_address ua " +
+                " WHERE u.id = ? and u.proxy_id = p.id and p.storage_id =s.id and ua.user_id = u.id";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, userId);
         if(maps.size()==0) throw new CustomException("没有关联业务员");
         return maps.get(0);
 
+    }
+
+    public List<Map<String,Object>> getProxyByStorageId(String storageId) throws CustomException {
+        String sql = "select id,realname,mobile from user where role_id = ? and status_ = 1 and storage_id = ?";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, RoleConstant.SALE_ID,storageId);
+        if(maps.size()==0) throw new CustomException("没有关联业务员");
+        return maps;
     }
 }

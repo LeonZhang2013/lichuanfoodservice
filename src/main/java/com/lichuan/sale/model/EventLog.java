@@ -26,7 +26,7 @@ public class EventLog {
     /**
      * 1、新消息、2、紧急、3、未处理、4、已处理
      */
-    private Integer status;
+    private Integer status_;
 
     /**
      * 创建时间
@@ -109,8 +109,8 @@ public class EventLog {
      *
      * @return status - 1、新消息、2、紧急、3、未处理、4、已处理
      */
-    public Integer getStatus() {
-        return status;
+    public Integer getStatus_() {
+        return status_;
     }
 
     /**
@@ -118,8 +118,8 @@ public class EventLog {
      *
      * @param status 1、新消息、2、紧急、3、未处理、4、已处理
      */
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setStatus_(Integer status_) {
+        this.status_ = status_;
     }
 
     /**

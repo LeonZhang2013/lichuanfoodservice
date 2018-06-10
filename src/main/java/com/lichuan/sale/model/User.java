@@ -13,14 +13,23 @@ public class User {
     private String token;
     private String realname;
     private Integer sex;
-    private Integer status;
+    private Integer status_;
     private Long parent_id;
     private Long role_id;
     private Long address_id;
     private Integer is_multi;
     private Long proxy_id;
-    private Long storeroom;
+    private Long storage_id;
     private String xcx_id;
+    private String referee;
+
+    public String getReferee() {
+        return referee;
+    }
+
+    public void setReferee(String referee) {
+        this.referee = referee;
+    }
 
     public String getXcx_id() {
         return xcx_id;
@@ -38,12 +47,13 @@ public class User {
         this.proxy_id = proxy_id;
     }
 
-    public Long getStoreroom() {
-        return storeroom;
+
+    public Long getStorage_id() {
+        return storage_id;
     }
 
-    public void setStoreroom(Long storeroom) {
-        this.storeroom = storeroom;
+    public void setStorage_id(Long storage_id) {
+        this.storage_id = storage_id;
     }
 
     public String getIcon() {
@@ -118,12 +128,12 @@ public class User {
         this.token = token;
     }
 
-    public Integer getStatus() {
-        return status;
+    public Integer getStatus_() {
+        return status_;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setStatus_(Integer status_) {
+        this.status_ = status_;
     }
 
     public Long getParent_id() {

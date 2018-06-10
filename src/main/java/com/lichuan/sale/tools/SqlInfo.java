@@ -15,6 +15,11 @@ public class SqlInfo {
         return sql;
     }
 
+    @Override
+    public String toString() {
+        return sql;
+    }
+
     public Object[] getValues() {
         return values.toArray();
     }

@@ -21,7 +21,7 @@ public  class SQLTools {
         List<Object> list = new ArrayList<>();
         for (Map.Entry item : toMap.entrySet()) {
             if (item.getValue() != null) {
-                sql.append(item.getKey()).append(",");
+                sql.append("`").append(item.getKey()).append("`,");
                 flag.append("?,");
                 list.add(item.getValue());
             }

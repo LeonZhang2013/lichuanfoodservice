@@ -14,7 +14,7 @@ public class Categroy {
 
     private String code;
 
-    private Integer status;
+    private Integer status_;
 
     /**
      * @return id
@@ -72,17 +72,12 @@ public class Categroy {
         this.code = code;
     }
 
-    /**
-     * @return status
-     */
-    public Integer getStatus() {
-        return status;
+
+    public Integer getStatus_() {
+        return status_;
     }
 
-    /**
-     * @param status
-     */
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setStatus_(Integer status_) {
+        this.status_ = status_;
     }
 }

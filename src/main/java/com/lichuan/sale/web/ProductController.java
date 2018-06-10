@@ -39,8 +39,7 @@ public class ProductController extends BaseController {
                 result.setMessage("已经到底了");
             }
         } catch (Exception e) {
-            result.setCode(Code.ERROR);
-            result.setMessage(e.getMessage());
+            result.setMessageOfError(e.getMessage());
         }
         return result;
     }
@@ -54,8 +53,7 @@ public class ProductController extends BaseController {
             result.setCode(Code.SUCCESS);
             result.setData(productUnit);
         } catch (Exception e) {
-            result.setCode(Code.ERROR);
-            result.setMessage(e.getMessage());
+            result.setMessageOfError(e.getMessage());
         }
         return result;
     }
@@ -68,10 +66,36 @@ public class ProductController extends BaseController {
             data.setCode(Code.SUCCESS);
             data.setData(maps);
         } catch (Exception e) {
-            data.setCode(Code.ERROR);
+            data.setMessageOfError(e.getMessage());
         }
         return data;
     }
+
+
+    @PostMapping("updateCategoryStatus")
+    public SingleResult<Object> updateCategoryStatus(Long categoryId, Long status) {
+        SingleResult<Object> data = new SingleResult<>();
+        try {
+            productService.updateCategoryStatus(categoryId,status);
+            data.setCode(Code.SUCCESS);
+        } catch (Exception e) {
+            data.setMessageOfError(e.getMessage());
+        }
+        return data;
+    }
+
+    @PostMapping("addCategory")
+    public  SingleResult<Object> addCategory(Long parentId,String  name){
+        SingleResult<Object> data = new SingleResult<>();
+        try {
+            productService.addCategory(parentId,name);
+            data.setCode(Code.SUCCESS);
+        } catch (Exception e) {
+            data.setMessageOfError(e.getMessage());
+        }
+        return data;
+    }
+
 
     @RequestMapping("changeStatus")
     public SingleResult<String> changeStatus(String id,String status) {
@@ -81,8 +105,7 @@ public class ProductController extends BaseController {
             result.setCode(Code.SUCCESS);
             result.setMessage("上传成功");
         } catch (Exception e) {
-            result.setCode(Code.ERROR);
-            result.setMessage(e.getMessage());
+            result.setMessageOfError(e.getMessage());
         }
         return result;
     }
@@ -99,8 +122,7 @@ public class ProductController extends BaseController {
             result.setCode(Code.SUCCESS);
             result.setMessage("上传成功");
         } catch (Exception e) {
-            result.setCode(Code.ERROR);
-            result.setMessage(e.getMessage());
+            result.setMessageOfError(e.getMessage());
         }
         return result;
     }

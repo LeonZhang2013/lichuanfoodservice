@@ -2,6 +2,7 @@ package com.lichuan.sale.tools.sqltools;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.tools.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -65,6 +66,19 @@ public class MySql {
             System.out.print(values.get(i).toString());
         }
         return sql.toString();
+    }
+
+    public void append(String s, Object... keys) throws CustomException {
+        List<Object> temp = new ArrayList<>();
+        for (Object key : keys) {
+            if (StringUtils.isNotNull(key)&&!key.toString().contains("null")) {
+                temp.add(key);
+            } else {
+                throw new CustomException("参数异常");
+            }
+        }
+        append(s);
+        values.addAll(temp);
     }
 
     public void notNullAppend(String s, Object... keys) {

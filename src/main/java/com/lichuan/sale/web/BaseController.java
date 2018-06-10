@@ -11,7 +11,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class BaseController {
 
     @Autowired
+    StatisticsService statisticsService;
+
+    @Autowired
     public  OrderService orderService;
+
+    @Autowired
+    AuthService auth;
 
     @Autowired
     public ProductService productService;
@@ -34,9 +40,22 @@ public class BaseController {
     @Autowired
     public WxService wxService;
 
+    @Autowired
+    public StorageService storageService;
+
     public User getUser(){
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         return (User) requestAttributes.getAttribute("user", 0);
+    }
+
+    /**
+     * 获取业务有仓库id
+     * @return
+     */
+    protected Long getStorageId(){
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        User user = (User) requestAttributes.getAttribute("user", 0);
+        return null == user?null:user.getStorage_id();
     }
 
     protected Long getUserId(){

@@ -136,11 +136,12 @@ public class UserController extends BaseController {
         return result;
     }
 
-    @PostMapping("updateState")
-    public SingleResult<Object> updateState(String user_id, String state) {
+    @PostMapping("updateStatus")
+    public SingleResult<Object> updateStatus(String user_id, String status) {
         SingleResult<Object> result = new SingleResult<Object>();
         try {
-            userService.updateState(user_id, state);
+            if(status==null) throw new CustomException("参数为空");
+            userService.updateStatus(user_id, status);
             result.setMessageOfSuccess("修改成功");
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());

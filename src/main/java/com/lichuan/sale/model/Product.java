@@ -14,7 +14,7 @@ public class Product {
     private String main_image;
     private String unit;
     private Integer stock;
-    private Integer status;
+    private Integer status_;
     private Long category_id;
     private BigDecimal freight;
     private Float weight;
@@ -80,12 +80,13 @@ public class Product {
         this.stock = stock;
     }
 
-    public Integer getStatus() {
-        return status;
+
+    public Integer getStatus_() {
+        return status_;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setStatus_(Integer status_) {
+        this.status_ = status_;
     }
 
     public Long getCategory_id() {

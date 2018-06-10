@@ -8,7 +8,7 @@ public enum Code {
 	NO_DATA(2,"暂无数据"),
 	EXP_PARAM(3,"参数错误"),
 	NO_AUTH(4,"权限不足"),
-	EXP_TOKEN(5,"token错误"),
+	EXP_TOKEN(5,"token错误~~!"),
 	EXP_SIGNATURE(6,"无效的签名"),
 	DISABLED(7,"该账号已被禁止使用"),
 	PWD_ERROR(8,"用户名或密码错误！");

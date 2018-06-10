@@ -92,11 +92,11 @@ public class UserService extends BaseService {
         }
         sql.addValue(user.getRole_id());
         sql.addValue(role_id);
-        sql.notNullAppend(" and u.status = ?", enable);
+        sql.notNullAppend(" and u.status_ = ?", enable);
         key = SQLTools.FuzzyKey(key);
         sql.notNullAppend(" and (u.mobile like ? or a.address like ? or u.nickname like ? or a.city like ? or u.realname like ?)",
                 key, key, key, key, key);
-        sql.orderBy("u.status asc", "u.id desc");
+        sql.orderBy("u.status_ asc", "u.id desc");
         //long count = sql.getCount(jdbcTemplate);
         sql.limit(pager);
         MultiResult<Map<String, Object>> result = new MultiResult<>();
@@ -123,8 +123,8 @@ public class UserService extends BaseService {
         return effect > 0;
     }
 
-    public void updateState(String user_id, String state) throws CustomException {
-        int effect = userDao.updateUserState(user_id, state);
+    public void updateStatus(String user_id, String status) throws CustomException {
+        int effect = userDao.updateUserStatus(user_id, status);
         if(effect == 0) throw  new CustomException("修改失败");
     }
 

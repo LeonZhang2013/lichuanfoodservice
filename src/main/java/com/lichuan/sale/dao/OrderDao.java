@@ -14,7 +14,7 @@ import java.util.Map;
 public class OrderDao extends BaseDao{
 
     public int operateOrder(Long orderId, Integer status) {
-        String sql = "update order_item set status = ? where order_id = ? and status = ?";
+        String sql = "update order_item set status_ = ? where order_id = ? and status_ = ?";
         return jdbcTemplate.update(sql, OrderStatus.getOrderStatus(status).next().getStatus(), orderId, status);
     }
 
@@ -35,5 +35,14 @@ public class OrderDao extends BaseDao{
             data.put("sale_num",0);
             return data;
         }
+    }
+
+    public Object getSaleNum(String product_id) {
+        String sql = "select SUM(buy_num) num from order_item where product_id = ?";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, product_id);
+        if(maps.size()>0){
+            return maps.get(0).get("num");
+        }
+        return null;
     }
 }

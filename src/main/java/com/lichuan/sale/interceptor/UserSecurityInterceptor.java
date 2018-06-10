@@ -36,6 +36,11 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         pageList.add("listener");
         pageList.add("getProducts");
         pageList.add("getProductSaleNum");
+        pageList.add("getCategories");
+        pageList.add("getNotice");
+        pageList.add("getStorageList");
+        pageList.add("getSaler");
+        pageList.add("addWXAddress");
     }
 
 
@@ -131,7 +136,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
             if (sign.equals(signatrue)) {
                 user = userService.getUserByToken(token);
                 if (null != user) {
-                    if (user.getStatus()==1) {
+                    if (user.getStatus_()==1) {
                         request.setAttribute("user", user);
                         //保存日志 没写
                     } else {

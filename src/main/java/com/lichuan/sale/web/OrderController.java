@@ -121,6 +121,23 @@ public class OrderController extends BaseController{
         return result;
     }
 
+    @GetMapping("getSaleNum")
+    public SingleResult<Object> getSaleNum(String product_id) {
+        SingleResult<Object> result = new SingleResult<>();
+        try {
+            if (null != product_id) {
+                Object saleNum = orderService.getSaleNum(product_id);
+                result.setCode(Code.SUCCESS);
+                result.setData(saleNum);
+            } else {
+                result.setCode(Code.EXP_PARAM);
+            }
+        } catch (Exception e) {
+            result.setMessageOfError(e.getMessage());
+        }
+        return result;
+    }
+
 
     @RequestMapping(value = "operateOrder", method = RequestMethod.POST)
     public synchronized SingleResult<String> operateOrder(Long order_id, Integer status) {

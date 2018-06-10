@@ -38,6 +38,11 @@ public class ShopCartDao extends BaseDao {
         return num;
     }
 
+    /**
+     * 这里的  id 是购物车的id
+     * @param userId
+     * @return
+     */
     public List<Map<String, Object>> getUserCart(Long userId) {
         String sql = "select p.*,s.product_id,s.id cart_id,s.num from shop_cart s,product p where s.product_id = p.id and s.user_id = ?";
         List<Map<String, Object>> data = jdbcTemplate.queryForList(sql, userId);

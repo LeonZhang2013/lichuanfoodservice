@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Pager<T> {
 
-	private int rows = 10;//每页显示多少条
+	private int rows = 30;//每页显示多少条
 	
 	private int page = 1;//当前页
 	
