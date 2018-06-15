@@ -7,6 +7,7 @@ public enum Code {
 	REPEAT(9,"重复提交"),
 	NO_DATA(2,"暂无数据"),
 	EXP_PARAM(3,"参数错误"),
+	NO_USER(10,"用户不存"),
 	NO_AUTH(4,"权限不足"),
 	EXP_TOKEN(5,"token错误~~!"),
 	EXP_SIGNATURE(6,"无效的签名"),

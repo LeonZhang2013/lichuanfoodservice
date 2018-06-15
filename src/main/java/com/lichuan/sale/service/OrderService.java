@@ -38,7 +38,7 @@ public class OrderService extends BaseService {
         BigDecimal totalPrice = (BigDecimal) Arith.calculationCharge(distance.toString(), userCart).get("totalPrice");
 
         int waitPay = OrderStatus.WAIT_PAY.getStatus();
-        String orderSql = "INSERT INTO `order_` (`id`,`user_id`,`pay_status`,`address_id`,`total_price`,`remark`) values(?,?,?,?,?,?)";
+        String orderSql = "INSERT INTO `order_` (`id`,`user_id`,`status_`,`address_id`,`total_price`,`remark`) values(?,?,?,?,?,?)";
         int update = jdbcTemplate.update(orderSql, order_id, user_id, waitPay, address_id, totalPrice, remark);
         if (update == 0) throw new CustomException("创建订单失败");
 
@@ -176,5 +176,9 @@ public class OrderService extends BaseService {
 
     public Object getSaleNum(String product_id) {
         return orderDao.getSaleNum(product_id);
+    }
+
+    public void paySuccess(String orderId) {
+        orderDao.paySuccess(orderId);
     }
 }

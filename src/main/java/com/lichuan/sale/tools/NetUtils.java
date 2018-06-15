@@ -15,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -156,4 +157,36 @@ public class NetUtils {
     }
 
 
+
+    /**
+     * 获取IP
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    public static String getIpAddr(HttpServletRequest request) throws Exception {
+        if (request == null) {
+            return "";
+        }
+        String ipString = request.getHeader("x-forwarded-for");
+        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
+            ipString = request.getHeader("Proxy-Client-IP");
+        }
+        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
+            ipString = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
+            ipString = request.getRemoteAddr();
+        }
+
+        // 多个路由时，取第一个非unknown的ip
+        final String[] arr = ipString.split(",");
+        for (final String str : arr) {
+            if (!"unknown".equalsIgnoreCase(str)) {
+                ipString = str;
+                break;
+            }
+        }
+        return ipString;
+    }
 }

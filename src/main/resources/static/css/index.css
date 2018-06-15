@@ -1,0 +1,61 @@
+@charset "utf-8";
+/* CSS Document */
+* {
+	margin: 0;
+	padding: 0;
+}
+
+ul,li,h1,h2,h3,h4,h5,h6,dl,dt,dd {
+	padding: 0;
+	margin: 0
+}
+
+ul {
+	list-style: none;
+}
+
+img {
+	border: none;
+}
+
+body {
+	font-size: 12px;
+	font-family: "\5B8B\4F53";
+	color: #333;
+	background: #fff;
+}
+
+.fleft {
+	float: left;
+}
+/*header*/
+.header {
+	height: 78px;
+	width: 100%;
+	min-width: 1200;
+	background: #066dc5;
+}
+
+.logo {
+	margin-top: 8px;
+	margin-left: 40px;
+}
+
+.header_right {
+	float: right;
+	margin-top: 25px;
+	width: 165px;
+}
+
+.header_right ul li {
+	float: left;
+	display: inline;
+	height: 40px;
+	overflow: hidden;
+	margin-left: 10px;
+}
+
+.header_right ul li a {
+	text-decoration: none;
+	color: #fff;
+}

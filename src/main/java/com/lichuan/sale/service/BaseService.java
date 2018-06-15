@@ -12,6 +12,7 @@ public class BaseService  {
     StatisticsDao statisticsDao;
 
     @Autowired
+    protected
     OrderDao orderDao;
 
     @Autowired

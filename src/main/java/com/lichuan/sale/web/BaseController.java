@@ -2,6 +2,7 @@ package com.lichuan.sale.web;
 
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.service.*;
+import com.lichuan.sale.service.wx.WxPayService;
 import com.lichuan.sale.service.wx.WxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,10 @@ public class BaseController {
 
     @Autowired
     AuthService auth;
+
+    @Autowired
+    protected
+    WxPayService wxPayService;
 
     @Autowired
     public ProductService productService;

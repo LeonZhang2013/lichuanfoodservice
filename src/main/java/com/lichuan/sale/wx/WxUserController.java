@@ -1,6 +1,7 @@
 package com.lichuan.sale.wx;
 
 
+import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.model.UserAddress;
 import com.lichuan.sale.result.Code;
@@ -25,14 +26,16 @@ public class WxUserController extends BaseController {
     public MapResult login(String code) {
         MapResult result = new MapResult();
         try {
-            if (StringUtils.isNotBlank(code) && StringUtils.isNotBlank(code)) {
-                User user = wxService.getXcxId(code);
+            String xcxId = wxService.getXcxId(code);
+            User user = wxService.getUserByCode(xcxId);
+            if (user != null) {
                 List<Map<String, Object>> cart = shopCartService.getWxShopCartList(user.getId());
                 result.setMessageOfSuccess("登陆成功");
                 result.put("user", user);
                 result.put("cart", cart);
-            } else {
-                result.setCode(Code.EXP_PARAM);
+            }else{
+                result.setCode(Code.NO_USER);
+                result.put("xcx_id", xcxId);
             }
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
@@ -42,11 +45,17 @@ public class WxUserController extends BaseController {
 
 
     @PostMapping("addWXAddress")
-    public SingleResult<Object> addWXAddress(User user,UserAddress userAddress) {
+    public SingleResult<Object> addWXAddress(User user, UserAddress userAddress) {
+
         SingleResult<Object> result = new SingleResult();
         try {
-            wxService.addUser(user,userAddress);
+            if (user.getXcx_id() == null && user.getXcx_id().length() < 1) {
+                throw new CustomException("小程序id 不正确");
+            }
+            wxService.addUser(user, userAddress);
+            user = wxService.getUserByCode(user.getXcx_id());
             result.setMessageOfSuccess();
+            result.setData(user);
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }

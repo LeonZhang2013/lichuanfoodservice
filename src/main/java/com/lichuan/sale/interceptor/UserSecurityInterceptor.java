@@ -27,7 +27,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
 
     static {
         pageList.add("login");
-        pageList.add("test");
+        pageList.add("index");
         pageList.add("register");
         pageList.add("getVerCode");
         pageList.add("checkVersion");
@@ -41,6 +41,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         pageList.add("getStorageList");
         pageList.add("getSaler");
         pageList.add("addWXAddress");
+        pageList.add("notifyInfo");
     }
 
 
@@ -115,21 +116,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
                 }
             }
 
-//            user = userService.getUserByToken(token);
-//            if (null != user) {
-//                if (user.getEnable() == 1) {
-//                    request.setAttribute("user", user);
-//                    //保存日志 没写
-//                } else {
-//                    result.setCode(Code.DISABLED);
-//                    response.getWriter().print(JSON.toJSONString(result));
-//                    return false;
-//                }
-//            } else {
-//                result.setCode(Code.EXP_TOKEN);
-//                response.getWriter().print(JSON.toJSONString(result));
-//                return false;
-//            }
+
 
 
             String sign = MessageDigestUtils.encrypt(builder.toString(), Algorithm.SHA1);
@@ -199,37 +186,4 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
 
     }
 
-    /**
-     * 获取IP
-     *
-     * @param request
-     * @return
-     * @throws Exception
-     */
-    private String getIpAddr(HttpServletRequest request) throws Exception {
-        if (request == null) {
-            return "";
-        }
-        String ipString = request.getHeader("x-forwarded-for");
-        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
-            ipString = request.getHeader("Proxy-Client-IP");
-        }
-        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
-            ipString = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (StringUtils.isEmpty(ipString) || "unknown".equalsIgnoreCase(ipString)) {
-            ipString = request.getRemoteAddr();
-        }
-
-        // 多个路由时，取第一个非unknown的ip
-        final String[] arr = ipString.split(",");
-        for (final String str : arr) {
-            if (!"unknown".equalsIgnoreCase(str)) {
-                ipString = str;
-                break;
-            }
-        }
-
-        return ipString;
-    }
 }

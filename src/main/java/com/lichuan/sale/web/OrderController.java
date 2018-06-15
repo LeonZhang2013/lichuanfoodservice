@@ -6,10 +6,12 @@ import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
+import com.lichuan.sale.tools.NetUtils;
 import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.Pager;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +21,8 @@ import java.util.Map;
 public class OrderController extends BaseController{
 
     @RequestMapping(value = "createOrder", method = RequestMethod.POST)
-    public synchronized SingleResult<String> addOrder(Long user_id, String remark, String address_id) {
-        SingleResult<String> result = new SingleResult<>();
+    public synchronized SingleResult<Object> addOrder(Long user_id, String remark, String address_id,HttpServletRequest request) {
+        SingleResult<Object> result = new SingleResult<>();
         result.setCode(Code.ERROR);
         try {
             String proxy_id = userService.getProxyId(user_id);
@@ -29,7 +31,8 @@ public class OrderController extends BaseController{
             }
             Long order_id = Tools.generatorId();
             BigDecimal totalPrice = orderService.createOrder(user_id,order_id,proxy_id,remark,address_id);
-            String paymentInfo  = orderService.getPaymentInfo(order_id.toString(),totalPrice,"订单付款");
+            String ip = NetUtils.getIpAddr(request);
+            Map<String, String> paymentInfo = wxPayService.getPaymentInfo(getUser().getXcx_id(), order_id.toString(), totalPrice.toString(), "订单付款", ip);
             result.setCode(Code.SUCCESS);
             result.setData(paymentInfo);
         } catch (Exception e) {
@@ -94,12 +97,7 @@ public class OrderController extends BaseController{
             result.setCode(Code.ERROR);
         }
         return result;
-
-
     }
-
-
-
 
 
 
