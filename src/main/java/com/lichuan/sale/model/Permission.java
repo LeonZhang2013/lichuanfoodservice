@@ -6,7 +6,6 @@ import javax.persistence.*;
 public class Permission {
 
 
-
     private Long id;
 
     /**
@@ -21,7 +20,6 @@ public class Permission {
 
 
     private Long parent_id;
-
 
 
     public Long getId() {

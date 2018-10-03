@@ -1,11 +1,9 @@
 package com.lichuan.sale.service;
 
 import com.lichuan.sale.configurer.AliYunSMS;
-import com.lichuan.sale.configurer.ZSConfig;
+import com.lichuan.sale.configurer.LCConfig;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.SingleResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,7 @@ public class AliYunService extends BaseService {
     AliYunSMS aliYunSMS;
 
     @Autowired
-    protected ZSConfig zsConfig;
+    protected LCConfig zsConfig;
 
     public SingleResult<Map<String, Object>> sendMassage(String phone) {
         //1、生成随机吗
@@ -33,7 +31,7 @@ public class AliYunService extends BaseService {
             verCodeDao.saveCode(phone, verCode, expirseDate);
             String message = aliYunSMS.sendSms(phone, verCode).getMessage();
             result.setCode(Code.SUCCESS);
-            result.setMessage("OK".equalsIgnoreCase(message)?"发送成功":message);
+            result.setMessage("OK".equalsIgnoreCase(message) ? "发送成功" : message);
         } catch (Exception e) {
             result.setCode(Code.ERROR);
             result.setMessage(e.getMessage());

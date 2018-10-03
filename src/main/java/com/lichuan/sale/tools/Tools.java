@@ -18,10 +18,10 @@ public class Tools {
 
 
     public static Long generatorId() {
-        return System.currentTimeMillis()+new Random().nextInt(999);
+        return System.currentTimeMillis() + new Random().nextInt(999);
     }
 
-    public static String encryptPass(String username,String newPwd) throws CustomException {
+    public static String encryptPass(String username, String newPwd) throws CustomException {
         try {
             return MessageDigestUtils.encrypt(username + newPwd, Algorithm.SHA1);
         } catch (Exception e) {
@@ -31,31 +31,32 @@ public class Tools {
 
     public static void PraseDate(List<Map<String, Object>> data, String key) {
         try {
-            for (int i=0; i<data.size(); i++){
-                Date o = (Date)data.get(i).get(key);
-                if (o!=null){
+            for (int i = 0; i < data.size(); i++) {
+                Date o = (Date) data.get(i).get(key);
+                if (o != null) {
                     String s = DateUtils.formatTime(o.getTime());
-                    data.get(i).put(key,s);
+                    data.get(i).put(key, s);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
 
     /**
      * 把后面的List<Map> 集合 并入前面的集合，如果map key 相同就putAll
-     * @param list1    饥饿的大鱼
-     * @param list2    被吃的小鱼
+     *
+     * @param list1 饥饿的大鱼
+     * @param list2 被吃的小鱼
      * @param key
      */
-    public static void mergeMap(List<Map<String, Object>> list1, List<Map<String, Object>> list2, String key){
-        for (int i=0; i<list1.size(); i++){
+    public static void mergeMap(List<Map<String, Object>> list1, List<Map<String, Object>> list2, String key) {
+        for (int i = 0; i < list1.size(); i++) {
             Map<String, Object> pItem = list1.get(i);
             Iterator<Map<String, Object>> iterator = list2.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Map<String, Object> sItem = iterator.next();
-                if(pItem.get(key).toString().equals(sItem.get(key).toString())){
+                if (pItem.get(key).toString().equals(sItem.get(key).toString())) {
                     pItem.putAll(sItem);
                     iterator.remove();
                     break;

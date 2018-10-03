@@ -23,10 +23,10 @@ import java.util.Map;
 public class NetUtils {
 
     public static String httpGet(String url, Map<String, String> datas) {
-        return httpGet(url,null,datas);
+        return httpGet(url, null, datas);
     }
 
-    public static String httpGet(String url,Map<String, String> headers, Map<String, String> datas) {
+    public static String httpGet(String url, Map<String, String> headers, Map<String, String> datas) {
         StringBuffer bufUrl = new StringBuffer(url);
         if (datas != null && datas.size() > 0) {
             bufUrl.append("?");
@@ -36,7 +36,7 @@ public class NetUtils {
             bufUrl.substring(bufUrl.length() - 1);
         }
         HttpGet httpGet = new HttpGet(bufUrl.toString());
-        if(headers!=null) {
+        if (headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 httpGet.setHeader(entry.getKey(), entry.getValue());
             }
@@ -157,9 +157,9 @@ public class NetUtils {
     }
 
 
-
     /**
      * 获取IP
+     *
      * @param request
      * @return
      * @throws Exception

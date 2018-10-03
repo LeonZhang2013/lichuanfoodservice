@@ -1,9 +1,11 @@
 package com.lichuan.sale.service;
 
+import com.lichuan.sale.annoation.MyRedis;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.Role;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.model.UserAddress;
+import com.lichuan.sale.model.Vip;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.tools.StringUtils;
@@ -11,6 +13,7 @@ import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.MySql;
 import com.lichuan.sale.tools.sqltools.Pager;
 import com.lichuan.sale.tools.sqltools.SQLTools;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +33,8 @@ public class UserService extends BaseService {
         Map<String, Object> data = new HashMap<>();
         try {
             User user = userDao.login(username, password);
-            if (user.getRole_id() == 0)throw new CustomException("正在审核中...");
             if (user == null) throw new CustomException("用户名或密码错误");
+            if (user.getRole_id() == 0) throw new CustomException("正在审核中...");
             List<Role> role = commonDao.getRoles(user.getRole_id());
 
             //是否允许多用户登录
@@ -84,17 +87,16 @@ public class UserService extends BaseService {
             Pager<Map<String, Object>> pager, User user, Long role_id, String key, Integer enable) {
 
         MySql sql = new MySql("select u.*, r.name role_name,a.city,a.address,u.realname ");
-        sql.append(" from user u, role r,user_address a ");
-        sql.append("where u.role_id = r.id and u.address_id = a.id ");
-        sql.append("and r.level > (select level from role where id = ?) and u.role_id = ?");
-        if(!auth.hasPermission(user.getRole_id(),AuthService.P_User_Manger)){
+        sql.append("from user u ");
+        sql.append("LEFT JOIN role r ON u.role_id = r.id");
+        sql.append("LEFT JOIN user_address a ON u.address_id = a.id ");
+        sql.append("where 1 = 1 ");
+        if (!auth.hasPermission(user.getRole_id(), AuthService.P_User_Manger)) {
             sql.notNullAppend(" and u.proxy_id= ?", user.getId());
         }
-        sql.addValue(user.getRole_id());
-        sql.addValue(role_id);
         sql.notNullAppend(" and u.status_ = ?", enable);
         key = SQLTools.FuzzyKey(key);
-        sql.notNullAppend(" and (u.mobile like ? or a.address like ? or u.nickname like ? or a.city like ? or u.realname like ?)",
+        sql.notNullAppend(" and (u.mobile like ? or a.address like ?  or a.city like ? or u.realname like ?)",
                 key, key, key, key, key);
         sql.orderBy("u.status_ asc", "u.id desc");
         //long count = sql.getCount(jdbcTemplate);
@@ -125,7 +127,7 @@ public class UserService extends BaseService {
 
     public void updateStatus(String user_id, String status) throws CustomException {
         int effect = userDao.updateUserStatus(user_id, status);
-        if(effect == 0) throw  new CustomException("修改失败");
+        if (effect == 0) throw new CustomException("修改失败");
     }
 
     public boolean updateMultiLogin(Long userId, Integer multi) {
@@ -137,35 +139,65 @@ public class UserService extends BaseService {
     public void updatePwd(String mobile, String newPwd) throws Exception {
         if (!StringUtils.isNotBlank(newPwd)) throw new CustomException("密码不能为空");
         int effect = userDao.updateUserPwd(mobile, newPwd);
-        if(effect == 0) throw new CustomException("修改密码出错");
+        if (effect == 0) throw new CustomException("修改密码出错");
     }
 
     public void phoneHasEixst(String phone) throws CustomException {
-        boolean b = userDao.userExist(phone);
+        boolean b = userDao.phoneHasEixst(phone);
         if (b) {
             throw new CustomException("手机号已存在");
         }
     }
 
-    public void updateAddress(String user_id,String address) throws CustomException {
-        int effect = userDao.updateUserAddress(user_id,address);
-        if(effect == 0)throw  new CustomException("修改失败");
+    public void updateAddress(String user_id, String address) throws CustomException {
+        int effect = userDao.updateUserAddress(user_id, address);
+        if (effect == 0) throw new CustomException("修改失败");
     }
 
-    public void updateUserCity(String user_id,String city) throws CustomException {
-        int effect = userDao.updateUserCity(user_id,city);
-        if(effect == 0)throw  new CustomException("修改失败");
+    public void updateUserCity(String user_id, String city) throws CustomException {
+        int effect = userDao.updateUserCity(user_id, city);
+        if (effect == 0) throw new CustomException("修改失败");
     }
 
     public String getProxyId(Long user_id) {
         return userDao.getProxyId(user_id);
     }
 
+
+    @Autowired
+    VipService mVipService;
+
+    @MyRedis(value = "user#{0}", expire = 300)
     public User getUserByToken(String token) {
-        return userDao.getUserByToken(token);
+        User user = userDao.getUserByToken(token);
+        if (user != null) {
+            Vip userVipInfo = mVipService.getUserVipInfo(user.getId());
+            user.setVip(userVipInfo);
+        }
+        return user;
     }
 
-    public Map<String,Object> addressAndDistance(Long userId) throws CustomException {
+    public Map<String, Object> addressAndDistance(Long userId) throws CustomException {
         return userDao.addressAndDistance(userId);
+    }
+
+    public List<Map<String, Object>> addressList(Long userId) throws CustomException {
+        return userDao.addressList(userId);
+    }
+
+    public List<Map<String, Object>> getUserAddress(Long userId) {
+        return userDao.getUserAddress(userId);
+    }
+
+    public void deleteAddress(String address_id) {
+        userDao.deleteAddress(address_id);
+    }
+
+    public void setDefaultAddress(String address_id) {
+        userDao.setDefaultAddress(address_id);
+    }
+
+    public List<Map<String, Object>> getUserListByProxy(long proxy_id) {
+        return userDao.getUserListByProxy(proxy_id);
     }
 }

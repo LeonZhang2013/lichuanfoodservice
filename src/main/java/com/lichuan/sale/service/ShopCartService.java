@@ -1,7 +1,5 @@
 package com.lichuan.sale.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.ShopCart;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -28,7 +26,7 @@ public class ShopCartService extends BaseService {
         return shopCartDao.getCartTotalNum(userId);
     }
 
-    public int addShopCart(Long user_id, Long product_id, Integer num)throws Exception{
+    public int addShopCart(Long user_id, Long product_id, Integer num) throws Exception {
         return shopCartDao.addShopCart(user_id, product_id, num);
     }
 
@@ -64,9 +62,9 @@ public class ShopCartService extends BaseService {
      * @throws Exception
      */
     public boolean setShopCart(Long cartId, Long userId, Integer num) throws Exception {
-        int effect = shopCartDao.setShopCart(cartId,userId,num);
-        if(effect==0) throw new CustomException("操作失败");
-        return effect>0;
+        int effect = shopCartDao.setShopCart(cartId, userId, num);
+        if (effect == 0) throw new CustomException("操作失败");
+        return effect > 0;
     }
 
     /**
@@ -79,8 +77,8 @@ public class ShopCartService extends BaseService {
      */
     public boolean deleteShopCart(Long cartId, Long userId) throws Exception {
         int effect = shopCartDao.deleteShopCart(cartId, userId);
-        if(effect==0) throw new CustomException("删除失败");
-        return effect>0;
+        if (effect == 0) throw new CustomException("删除失败");
+        return effect > 0;
     }
 
     /**
@@ -93,8 +91,8 @@ public class ShopCartService extends BaseService {
      */
     public boolean batchDeleteShopCart(String idList, Long userId) throws Exception {
         int effect = shopCartDao.batchDeleteShopCart(idList, userId);
-        if(effect==0) throw new CustomException("删除失败");
-        return effect>0;
+        if (effect == 0) throw new CustomException("删除失败");
+        return effect > 0;
     }
 
 
@@ -107,8 +105,8 @@ public class ShopCartService extends BaseService {
      */
     public boolean clearShopCart(Long userId) throws Exception {
         int effect = shopCartDao.clearShopCart(userId);
-        if(effect==0) throw new CustomException("清空失败");
-        return effect>0;
+        if (effect == 0) throw new CustomException("清空失败");
+        return effect > 0;
     }
 
 
@@ -128,9 +126,9 @@ public class ShopCartService extends BaseService {
 
 
     @Transactional
-    public void saveCartList(List<ShopCart> arras,Long user_id) throws CustomException {
+    public void saveCartList(List<ShopCart> arras, Long user_id) throws CustomException {
         shopCartDao.clearShopCart(user_id);
-        String sql ="INSERT INTO `shop_cart`(user_id,`product_id`,`num`) values(?,?,?)";
+        String sql = "INSERT INTO `shop_cart`(user_id,`product_id`,`num`) values(?,?,?)";
         int[] ints = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ShopCart item = arras.get(i);
@@ -138,6 +136,7 @@ public class ShopCartService extends BaseService {
                 ps.setString(2, item.getProduct_id().toString());
                 ps.setString(3, item.getNum().toString());
             }
+
             public int getBatchSize() {
                 return arras.size();
             }

@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
+    public static boolean Test = false;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
 
 
     @Override

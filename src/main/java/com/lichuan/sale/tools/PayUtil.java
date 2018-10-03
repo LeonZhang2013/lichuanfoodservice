@@ -1,6 +1,17 @@
 package com.lichuan.sale.tools;
 
+import com.lichuan.sale.configurer.XCXInfo;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.util.EntityUtils;
+import org.dom4j.io.SAXReader;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -12,6 +23,7 @@ import org.w3c.dom.NodeList;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -22,12 +34,58 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.util.*;
 
 public class PayUtil {
 
     public static final String FIELD_SIGN = "sign";
+
+    public static String httpPostSSL(String refundUrl, String signedXml) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        FileInputStream instream = new FileInputStream(new File(XCXInfo.SSL_KEY));
+        try {
+            keyStore.load(instream, XCXInfo.PAY_MCH_ID.toCharArray());
+        } finally {
+            instream.close();
+        }
+        SSLContext sslcontext = SSLContexts.custom().loadKeyMaterial(keyStore, XCXInfo.PAY_MCH_ID.toCharArray()).build();
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                sslcontext, new String[]{"TLSv1"}, null,
+                SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setSSLSocketFactory(sslsf).build();
+        HttpPost httppost = new HttpPost(refundUrl);
+
+        StringBuffer buffer = null;
+        try {
+            StringEntity se = new StringEntity(signedXml);
+            httppost.setEntity(se);
+            CloseableHttpResponse responseEntry = httpclient.execute(httppost);
+            try {
+                // 读取服务器端返回的内容
+                HttpEntity entity = responseEntry.getEntity();
+                InputStream content = entity.getContent();
+                InputStreamReader isr = new InputStreamReader(content, "utf-8");
+                BufferedReader br = new BufferedReader(isr);
+                buffer = new StringBuffer();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    buffer.append(line);
+                }
+                EntityUtils.consume(entity);
+            } finally {
+                responseEntry.close();
+            }
+        } finally {
+            httpclient.close();
+        }
+        return buffer.toString();
+    }
+
+
     enum SignType {
         MD5, HMACSHA256
     }

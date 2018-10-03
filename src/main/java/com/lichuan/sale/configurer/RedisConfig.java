@@ -1,31 +1,22 @@
 package com.lichuan.sale.configurer;
 
-import java.io.Serializable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 
 @Configuration
 @EnableCaching//启用缓存，这个注解很重要；
@@ -100,25 +91,6 @@ public class RedisConfig extends CachingConfigurerSupport {
         return jedisPool;
     }
 
-    /**
-     * 自定义key.
-     * 此方法将会根据类名+方法名+所有参数的值生成唯一的一个key
-     */
-    @Override
-    public KeyGenerator keyGenerator() {
-        return new KeyGenerator() {
-            @Override
-            public Object generate(Object o, Method method, Object... objects) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(o.getClass().getName());
-                sb.append(method.getName());
-                for (Object obj : objects) {
-                    sb.append(obj.toString());
-                }
-                return sb.toString();
-            }
-        };
-    }
 
 
 }

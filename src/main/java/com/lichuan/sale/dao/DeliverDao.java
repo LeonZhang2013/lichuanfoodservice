@@ -6,12 +6,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.lichuan.sale.configurer.StorageStatus;
 import com.lichuan.sale.core.CustomException;
 import com.lichuan.sale.model.ProductStatus;
+import com.lichuan.sale.model.User;
 import com.lichuan.sale.tools.Tools;
 import com.lichuan.sale.tools.sqltools.MySql;
 import com.lichuan.sale.tools.sqltools.Pager;
 import com.lichuan.sale.tools.sqltools.SQLTools;
-import constant.OrderStatus;
-import org.springframework.data.domain.Page;
+import com.lichuan.sale.constant.OrderStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.stereotype.Repository;
 
@@ -26,31 +26,47 @@ import java.util.Map;
 public class DeliverDao extends BaseDao {
 
 
-    public List<Map<String, Object>> getDeliverProduct(Long userId) {
+    public List<Map<String, Object>> getDeliverProduct(User proxy) throws CustomException {
         MySql mySql = new MySql();
-        mySql.append("SELECT a.*,b.num from");
-        mySql.append("(SELECT product_image,product_unit,`product_id`,`product_name`, SUM(`buy_num`-`give_num`) buy_num from `order_item` i");
-        mySql.append("WHERE proxy_id in (SELECT u.id FROM  user u,user p WHERE p.storage_id = u.storage_id and p.`id` = ? )");
-        mySql.append(" and `status_` = ? GROUP BY `product_id`)  a");
-        mySql.append("left join");
-        mySql.append("(SELECT `product_id`,num FROM `user` u,`storage_product` s");
-        mySql.append("WHERE u.storage_id = s.`storage_id` and u.id = ? ) b");
-        mySql.append("on a.product_id= b.product_id");
+        mySql.append("SELECT i.`product_id` ,i.`product_image`,i.`product_name`,");
+        mySql.append("SUM(i.`buy_num`-i.`give_num`) buy_num,   i.product_unit");
+        mySql.append("FROM `order_` o, `order_item` i  ");
+        mySql.append("WHERE o.`id` =i.`order_id` and o.`status_` = 1 and o.`deliver_ok` <> 1");
+        mySql.append("and `proxy_id` = ?  GROUP BY i.`product_id`", proxy.getId());
 
-        List<Map<String, Object>> maps = jdbcTemplate.queryForList(mySql.toString(), userId, OrderStatus.WAIT_RECEIVE.getStatus(), userId);
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(mySql.toString(), mySql.getValues());
         return maps;
     }
 
-    public List<Map<String, Object>> getDeliverOrderList(Long userId, String key) throws CustomException {
+    public List<Map<String, Object>> getDeliverProduct1(User porxy) throws CustomException {
         MySql mySql = new MySql();
-        mySql.append("SELECT o.id order_id ,a.name,a.city,a.address,a.mobile,o.create_time,o.update_time");
-        mySql.append("FROM `order_item` i,`order_` o,`user_address` a");
-        mySql.append("WHERE o.id = i.order_id and a.id = o.address_id and  i.status_ = 1 ");
-        mySql.append("and i.`proxy_id` = ?", userId);
-        String keys = SQLTools.FuzzyKey(key);
-        mySql.notNullAppend("and (a.address like ? or a.name like ?)", keys, keys);
-        mySql.append("GROUP BY `order_id` ORDER BY a.id");
+        Long storage_id = porxy.getStorage_id();
+
+        mySql.append("SELECT s.*,b.num from");
+        mySql.append("(SELECT i.`product_id` ,i.`product_image`,i.`product_name`,SUM(i.`buy_num`-i.`give_num`) buy_num, ");
+        mySql.append("i.product_unit FROM `order_` o, `order_item` i");
+        mySql.append("WHERE o.`id` =i.`order_id` and o.`status_` = ?", OrderStatus.WAIT_RECEIVE.getStatus());
+        mySql.append("and `storage_id` = ? GROUP BY i.`product_id`) s", storage_id);
+        mySql.append("left join");
+        mySql.append("(SELECT `product_id`,num FROM `storage_product` s");
+        mySql.append("WHERE s.`storage_id` = ? ) b", storage_id);
+        mySql.append("on s.product_id= b.product_id");
+
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(mySql.toString(), mySql.getValues());
+        return maps;
+    }
+
+    public List<Map<String, Object>> getDeliverOrderList(User user, String key) throws CustomException {
+        MySql mySql = new MySql();
+        mySql.append("SELECT o.id order_id ,o.user_name name,o.city,o.address,o.mobile,o.create_time,o.update_time,o.deliver_ok ");
+        mySql.append("FROM `order_item` i,`order_` o");
+        mySql.append("WHERE o.id = i.order_id and o.status_ = ? ", OrderStatus.WAIT_RECEIVE.getStatus());
+        mySql.append("and o.deliver_ok <> 1 and o.`storage_id` = ? ", user.getStorage_id());
+        String keys = SQLTools.FuzzyKey(key);
+        mySql.notNullAppend("and (o.address like ? or o.user_name like ?)", keys, keys);
+        mySql.append("GROUP BY `order_id` ORDER BY o.create_time");
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(mySql.toString(), mySql.getValues());
+
         return maps;
     }
 
@@ -66,24 +82,29 @@ public class DeliverDao extends BaseDao {
     public void deliverOk(String deliverJson, String order_id) {
         JSONArray list = JSON.parseArray(deliverJson);
         MySql mySql = new MySql();
-        jdbcTemplate.update("UPDATE `order_` set `update_time` = now() WHERE `id` = ? ",order_id);
 
-        mySql.append("UPDATE `order_item` set `give_num` = ? , status_=? WHERE `order_id` = ? and `product_id` = ?");
+        final boolean[] isDeliverOk = {true};
+        mySql.append("UPDATE `order_item` set `give_num` = ?  WHERE order_id =? and `product_id` = ?");
         int[] ints = jdbcTemplate.batchUpdate(mySql.toString(), new BatchPreparedStatementSetter() {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 JSONObject item = (JSONObject) list.get(i);
                 int deliver_num = item.getIntValue("deliver_num");
                 int buy_num = item.getIntValue("buy_num");
+                if (buy_num != deliver_num) isDeliverOk[0] = false;
                 ps.setObject(1, deliver_num);
-                ps.setObject(2, deliver_num >= buy_num ? OrderStatus.COMPLETE.getStatus() : OrderStatus.WAIT_RECEIVE.getStatus());
-                ps.setObject(3, order_id);
-                ps.setObject(4, item.get("product_id"));
+                ps.setObject(2, order_id);
+                ps.setObject(3, item.get("product_id"));
             }
 
             public int getBatchSize() {
                 return list.size();
             }
         });
+        if (isDeliverOk[0]) {
+            jdbcTemplate.update("UPDATE `order_` set `deliver_ok` = 1 WHERE `id` = ? ", order_id);
+        } else {
+            jdbcTemplate.update("UPDATE `order_` set `deliver_ok` = ? WHERE `id` = ? ", System.currentTimeMillis(), order_id);
+        }
 
     }
 
@@ -103,15 +124,17 @@ public class DeliverDao extends BaseDao {
 
     /**
      * 获取 客户已下单的商品数。
-     * @param storageId  传空代表获取所有
+     *
+     * @param storageId 传空代表获取所有
      * @return
      * @throws CustomException
      */
     public List<Map<String, Object>> getUserOrderNum(Long storageId) throws CustomException {
         MySql mySql = new MySql();
-        mySql.append("SELECT `product_id`,`product_name`, product_image,SUM(`buy_num`-`give_num`) order_num,product_unit unit from `order_item` i");
-        mySql.append("WHERE `status_` = ? ", OrderStatus.WAIT_RECEIVE.getStatus());
-        mySql.notNullAppend("and proxy_id in (SELECT id FROM  user WHERE storage_id = ? )", storageId);
+        mySql.append("SELECT `product_id`,`product_name`, product_image,SUM(`buy_num`-`give_num`) order_num,product_unit unit ");
+        mySql.append("from `order_item` i, order_ o");
+        mySql.append("WHERE o.id = i.order_id and o.`status_` = ? ", OrderStatus.WAIT_RECEIVE.getStatus());
+        mySql.notNullAppend("and o.storage_id = ? ", storageId);
         mySql.append("GROUP BY `product_id`");
         return jdbcTemplate.queryForList(mySql.toString(), mySql.getValues());
     }
@@ -119,7 +142,7 @@ public class DeliverDao extends BaseDao {
     //获取 公司发给仓库，待接收商品 和 和补仓信息
     public List<Map<String, Object>> getStorageProductNum(Long storageId) throws CustomException {
         MySql mySql = new MySql();
-        mySql.append("SELECT sp.product_id,p.name product_name,p.main_image product_image,sp.num");
+        mySql.append("SELECT sp.product_id,p.name product_name,p.main_image product_image,sp.num, p.unit");
         mySql.append("FROM storage_product sp,product p WHERE p.id = sp.product_id and sp.storage_id = ?", storageId);
         List<Map<String, Object>> storage = jdbcTemplate.queryForList(mySql.toString(), storageId);
         return storage;
@@ -129,26 +152,27 @@ public class DeliverDao extends BaseDao {
         String update = "UPDATE `storage_product` set `num` = `num`+? WHERE `product_id` = ? and `storage_id` = ?";
         int[] oks = updateStorageNum(update, list, storageId);
         List<Object> insert = new ArrayList<>();
-        for(int i=0; i<oks.length; i++) {
-            if(oks[i]==0) insert.add(list.get(i));
+        for (int i = 0; i < oks.length; i++) {
+            if (oks[i] == 0) insert.add(list.get(i));
         }
-        if(insert.size()>0){
+        if (insert.size() > 0) {
             String sql = "insert into storage_product (num,product_id,storage_id) values (?,?,?)";
             int[] ints = updateStorageNum(sql, insert, storageId);
-            for(int i=0; i<ints.length; i++) {
-                if(ints[i]==0) throw  new CustomException("插入失败");
+            for (int i = 0; i < ints.length; i++) {
+                if (ints[i] == 0) throw new CustomException("插入失败");
             }
         }
     }
 
-    public int[] updateStorageNum(String sql,List<Object> list, Long storageId) {
+    public int[] updateStorageNum(String sql, List<Object> list, Long storageId) {
         return jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                Map<String,Object> item = (Map<String, Object>) list.get(i);
+                Map<String, Object> item = (Map<String, Object>) list.get(i);
                 ps.setObject(1, item.get("num"));
                 ps.setObject(2, item.get("product_id"));
                 ps.setObject(3, storageId);
             }
+
             public int getBatchSize() {
                 return list.size();
             }
@@ -158,7 +182,7 @@ public class DeliverDao extends BaseDao {
     public void confirmReceive(List<Object> list, String log, Long storageId, Long userId, String order_id) throws CustomException {
         String sql = "update storage_order set status_ = ?,`log` = ?,receive_id=? where id = ? and status_ = ?";
         int update = jdbcTemplate.update(sql, StorageStatus.ORDER_COMPLETE, log, userId, order_id, StorageStatus.ORDER_SEND);
-        if(update == 0) throw new CustomException("操作失败");
+        if (update == 0) throw new CustomException("操作失败");
         MySql mySql = new MySql();
         mySql.append("UPDATE `storage_order_item`  ");
         mySql.append("SET receive_num = ?  ");
@@ -170,6 +194,7 @@ public class DeliverDao extends BaseDao {
                 ps.setObject(2, order_id);
                 ps.setObject(3, item.get("product_id"));
             }
+
             public int getBatchSize() {
                 return list.size();
             }
@@ -178,7 +203,8 @@ public class DeliverDao extends BaseDao {
 
     public List<Map<String, Object>> receiveList(Pager<Map<String, Object>> pager, Long storage_id) throws CustomException {
         MySql mySql = new MySql();
-        mySql.append("SELECT so.*,u.realname request_name,s.realname send_name FROM `storage_order` so,`user` u,user s ");
+        mySql.append("SELECT so.*,u.realname request_name,s.realname send_name  ");
+        mySql.append("FROM `storage_order` so,`sys_user` u,`sys_user` s");
         mySql.append("WHERE u.id = so.request_id and s.id = so.send_id and so.storage_id = ?", storage_id);
         mySql.orderBy("status_");
         mySql.limit(pager);
@@ -202,13 +228,13 @@ public class DeliverDao extends BaseDao {
         JSONArray products = JSON.parseArray(dataJson);
         //去除为0 的商品
         Iterator<Object> iterator = products.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             JSONObject next = (JSONObject) iterator.next();
-            if(next.getIntValue("num") == 0){
+            if (next.getIntValue("num") == 0) {
                 iterator.remove();
             }
         }
-        if(products.size() == 0) return;
+        if (products.size() == 0) return;
 
         Long order_id = Tools.generatorId();
         //默认状态是 装车，所以没设定
@@ -222,12 +248,12 @@ public class DeliverDao extends BaseDao {
                 ps.setObject(2, item.get("product_id"));
                 ps.setObject(3, item.get("num"));
             }
+
             public int getBatchSize() {
                 return products.size();
             }
         });
     }
-
 
 
     /**

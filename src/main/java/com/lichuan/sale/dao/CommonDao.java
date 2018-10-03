@@ -3,8 +3,7 @@ package com.lichuan.sale.dao;
 import com.alibaba.fastjson.JSONArray;
 import com.lichuan.sale.model.Role;
 import com.lichuan.sale.model.Version;
-import com.lichuan.sale.result.Code;
-import com.lichuan.sale.result.MultiResult;
+import com.lichuan.sale.constant.LcConstant;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -65,34 +64,43 @@ public class CommonDao {
         return maps.size() > 0 ? maps.get(0) : null;
     }
 
-    public Map<String,Object> getNoticeOfClient() {
+    public Map<String, Object> getNoticeOfClient() {
         String sql = "select * from notice where isShow = 1 and type= 1 order by id desc limit 0,1";
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
         return maps.size() > 0 ? maps.get(0) : null;
     }
 
-    public List<Map<String,Object>> getPermissions() {
+    public List<Map<String, Object>> getPermissions() {
         return jdbcTemplate.queryForList("SELECT * FROM permission");
     }
 
     @Transactional
     public void updatePermissions(Long userId, String role_id, JSONArray groupJson) {
-        jdbcTemplate.update("delete from role_permission where role_id = ?",role_id);
-        for (int i=0; i<groupJson.size(); i++){
+        jdbcTemplate.update("delete from role_permission where role_id = ?", role_id);
+        for (int i = 0; i < groupJson.size(); i++) {
             Object permission_id = groupJson.getJSONObject(i).get("id");
-            jdbcTemplate.update("insert into role_permission (role_id,permission_id,update_uid) values (?,?,?)",role_id,permission_id,userId);
+            jdbcTemplate.update("insert into role_permission (role_id,permission_id,update_uid) values (?,?,?)", role_id, permission_id, userId);
         }
     }
 
-    public List<Map<String,Object>> getMyPermissions(String role_id) {
-        return jdbcTemplate.queryForList("select * from role_permission where role_id = ?",role_id);
+    public List<Map<String, Object>> getMyPermissions(String role_id) {
+        return jdbcTemplate.queryForList("select * from role_permission where role_id = ?", role_id);
     }
 
 
-    public List<Map<String,Object>> getArea(Long parentId) {
-        return jdbcTemplate.queryForList("select * from area where enable=1 and parent_id = ?",parentId);
+    public List<Map<String, Object>> getArea(Long parentId) {
+        return jdbcTemplate.queryForList("select * from area where enable=1 and parent_id = ?", parentId);
     }
 
 
-
+    public Map<String, Role> getRoleMap() {
+        Map<String, Role> roleMap = LcConstant.getRoleMap();
+        if (roleMap.size() == 0) {
+            List<Role> roleList = getRoles();
+            for (int i = 0; i < roleList.size(); i++) {
+                roleMap.put(roleList.get(i).getId() + "", roleList.get(i));
+            }
+        }
+        return roleMap;
+    }
 }

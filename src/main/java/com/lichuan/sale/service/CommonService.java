@@ -14,6 +14,14 @@ import java.util.Map;
 public class CommonService extends BaseService {
 
 
+    /**
+     * 严重code
+     *
+     * @param phone
+     * @param verCode
+     * @return
+     * @throws CustomException
+     */
     public boolean verCode(String phone, String verCode) throws CustomException {
         boolean isOk = false;
         List<String> codes = verCodeDao.getVerCode(phone);//查询未过期的验证码
@@ -31,16 +39,18 @@ public class CommonService extends BaseService {
 
     /**
      * 获得省市区
+     *
      * @param parentId
      * @return
      * @throws Exception
      */
-    public List<Map<String,Object>> getArea(Long parentId)throws Exception{
+    public List<Map<String, Object>> getArea(Long parentId) throws Exception {
         return commonDao.getArea(parentId);
     }
 
     /**
      * 查询这 角色id
+     *
      * @param role_id 获取的角色列表不能大于自己的角色。
      * @return
      */
@@ -50,28 +60,29 @@ public class CommonService extends BaseService {
 
     /**
      * 检查更新
+     *
      * @param code
      * @param packageName
      * @return
      * @throws Exception
      */
-    public Version checkVersion(Integer code, String packageName)throws Exception{
-        return commonDao.checkVersion(code,packageName);
+    public Version checkVersion(Integer code, String packageName) throws Exception {
+        return commonDao.checkVersion(code, packageName);
     }
 
-    public List<Map<String,Object>>  getPermissions() {
+    public List<Map<String, Object>> getPermissions() {
         return commonDao.getPermissions();
     }
 
     public void updatePermissions(Long userId, String role_id, JSONArray groupJson) {
-        commonDao.updatePermissions(userId,role_id,groupJson);
+        commonDao.updatePermissions(userId, role_id, groupJson);
     }
 
-    public List<Map<String,Object>> getMyPermissions(String role_id) {
+    public List<Map<String, Object>> getMyPermissions(String role_id) {
         return commonDao.getMyPermissions(role_id);
     }
 
-    public Map<String,Object> getNoticeOfwx() {
+    public Map<String, Object> getNoticeOfwx() {
         return commonDao.getNoticeOfClient();
     }
 }

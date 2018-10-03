@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class MapResult extends Result {
 
-    private Map<String,Object> data = new HashMap<>();
+    private Map<String, Object> data = new HashMap<>();
 
     private long total;
 
@@ -18,8 +18,8 @@ public class MapResult extends Result {
         this.total = total;
     }
 
-    public void put(String key,Object t){
-        data.put(key,t);
+    public void put(String key, Object t) {
+        data.put(key, t);
     }
 
     public Map<String, Object> getData() {

@@ -3,14 +3,14 @@ package com.lichuan.sale.result;
 
 public class SingleResult<T> extends Result {
 
-	private T data;
+    private T data;
 
-	public T getData() {
-		return data;
-	}
+    public T getData() {
+        return data;
+    }
 
-	public void setData(T data) {
-		this.data = data;
-	}
-	
+    public void setData(T data) {
+        this.data = data;
+    }
+
 }

@@ -15,8 +15,8 @@ public class ShopCartDao extends BaseDao {
     public int getCartTotalNum(Long userId) {
         String sql = "SELECT SUM(num) num FROM shop_cart WHERE user_id = ?";
         Map<String, Object> map = jdbcTemplate.queryForMap(sql, userId);
-        if(map.size()>0){
-            return Integer.parseInt(map.get("num")+"");
+        if (map.size() > 0) {
+            return Integer.parseInt(map.get("num") + "");
         }
         return 0;
     }
@@ -34,12 +34,13 @@ public class ShopCartDao extends BaseDao {
             sql = "insert into shop_cart (user_id,product_id,num) VALUES (?,?,?)";
             effect = jdbcTemplate.update(sql, user_id, product_id, num);
         }
-        if(effect==0) throw new CustomException("添加失败");
+        if (effect == 0) throw new CustomException("添加失败");
         return num;
     }
 
     /**
      * 这里的  id 是购物车的id
+     *
      * @param userId
      * @return
      */
@@ -60,7 +61,6 @@ public class ShopCartDao extends BaseDao {
     }
 
 
-
     public int setShopCart(Long cartId, Long userId, Integer num) {
         String sql = "update shop_cart set num = num+? where id = ? and user_id = ?";
         return jdbcTemplate.update(sql, num, cartId, userId);
@@ -68,22 +68,21 @@ public class ShopCartDao extends BaseDao {
 
     public int deleteShopCart(Long cartId, Long userId) {
         String sql = "delete from shop_cart where id = ? and user_id = ?";
-        int effect = jdbcTemplate.update(sql,cartId,userId);
+        int effect = jdbcTemplate.update(sql, cartId, userId);
         return effect;
     }
 
     public int batchDeleteShopCart(String idList, Long userId) {
         String sql = "delete from shop_cart where id in ? and user_id = ?";
-        int effect = jdbcTemplate.update(sql,"("+idList+")",userId);
+        int effect = jdbcTemplate.update(sql, "(" + idList + ")", userId);
         return effect;
     }
 
     public int clearShopCart(Long userId) {
         String sql = "delete from shop_cart where user_id = ?";
-        int effect = jdbcTemplate.update(sql,userId);
+        int effect = jdbcTemplate.update(sql, userId);
         return effect;
     }
-
 
 
 }

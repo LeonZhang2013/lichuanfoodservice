@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
 
-public class BaseService  {
+public class BaseService {
 
     @Autowired
     StatisticsDao statisticsDao;
@@ -19,17 +19,22 @@ public class BaseService  {
     DeliverDao deliverDao;
 
     @Autowired
+    public
     ShopCartDao shopCartDao;
 
     @Autowired
     StorageDao storageDao;
 
     @Autowired
+    public
     JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public
+    protected
     UserDao userDao;
+
+    @Autowired
+    SysUserDao sysUserDao;
 
     @Autowired
     RoleDao roleDao;

@@ -83,7 +83,7 @@
     </logger>
 
     <logger name="com.zhongshu.vegetables.dao" level="DEBUG">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </logger>
 </configuration>
 

@@ -4,46 +4,47 @@ import com.alibaba.fastjson.JSON;
 
 public abstract class Result {
 
-	private Code code = Code.ERROR;
-	
-	private String message;
+    private Code code = Code.ERROR;
 
-	public int getCode() {
-		return code.getStatus();
-	}
+    private String message;
 
-	public void setCode(Code code) {
-		this.code = code;
-	}
+    public int getCode() {
+        return code.getStatus();
+    }
 
-	public String getMessage() {
-		return message != null?message:code.getMessage();
-	}
+    public void setCode(Code code) {
+        this.code = code;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public String getMessage() {
+        return message != null ? message : code.getMessage();
+    }
 
-	public void setMessageOfSuccess(String message) {
-		this.code = Code.SUCCESS;
-		this.message = message;
-	}
-	public void setMessageOfSuccess() {
-		this.code = Code.SUCCESS;
-	}
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	public void setMessageOfError() {
-		this.code = Code.ERROR;
-	}
+    public void setMessageOfSuccess(String message) {
+        this.code = Code.SUCCESS;
+        this.message = message;
+    }
 
-	public void setMessageOfError(String message) {
-		this.code = Code.ERROR;
-		this.message = message;
-	}
+    public void setMessageOfSuccess() {
+        this.code = Code.SUCCESS;
+    }
 
-	@Override
-	public String toString() {
-		return JSON.toJSONString(this);
-	}
-	
+    public void setMessageOfError() {
+        this.code = Code.ERROR;
+    }
+
+    public void setMessageOfError(String message) {
+        this.code = Code.ERROR;
+        this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
+
 }

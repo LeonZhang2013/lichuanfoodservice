@@ -1,14 +1,11 @@
 package com.lichuan.sale.web;
 
 import com.lichuan.sale.core.CustomException;
-import com.lichuan.sale.model.User;
-import com.lichuan.sale.model.UserAddress;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.MapResult;
 import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
 import com.lichuan.sale.tools.Arith;
-import com.lichuan.sale.tools.StringUtils;
 import com.lichuan.sale.tools.sqltools.Pager;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,46 +16,9 @@ import java.util.Map;
  * Created by leonZhang on 2018/05/14.
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("user")
 public class UserController extends BaseController {
 
-
-    @PostMapping("login")
-    public SingleResult<Object> login(String username, String password) {
-        SingleResult<Object> result = new SingleResult<>();
-        try {
-            if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-                Map<String, Object> login = userService.login(username, password);
-                result.setData(login);
-                result.setMessageOfSuccess("登陆成功");
-            } else {
-                result.setCode(Code.EXP_PARAM);
-            }
-        } catch (Exception e) {
-            result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
-
-
-    @PostMapping("register")
-    public SingleResult<String> register(User user, UserAddress userAddress, String vercode) {
-        SingleResult<String> result = new SingleResult<>();
-        try {
-            if (commonService.verCode(user.getMobile(), vercode)) {
-                if (null == user.getRole_id()) user.setRole_id(9999l);
-                user.setUsername(user.getMobile());
-                userService.addUser(user, userAddress);
-                result.setMessageOfSuccess("注册用户成功");
-            } else {
-                result.setCode(Code.ERROR);
-                result.setMessage("验证码有误");
-            }
-        } catch (Exception e) {
-            result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
 
     @RequestMapping("getUserList")
     public MultiResult<Map<String, Object>> getUserList(Pager<Map<String, Object>> pager, Long role_id, String key, Integer enable) {
@@ -73,18 +33,19 @@ public class UserController extends BaseController {
     }
 
 
-    @PostMapping("getAddress")
-    public SingleResult<Object> getAddress(String address_id) {
-        SingleResult<Object> result = new SingleResult<>();
+    @RequestMapping(value = "getUserListByProxy", method = RequestMethod.GET)
+    public SingleResult<List<Map<String, Object>>> getUserListByProxy(long proxy_id) {
+        SingleResult<List<Map<String, Object>>> result = new SingleResult<>();
         try {
-            Map<String, Object> address = userService.getAddress(address_id);
-            result.setCode(Code.SUCCESS);
-            result.setData(address);
-        } catch (CustomException e) {
-            result.setMessageOfError(e.getMessage());
+            List<Map<String, Object>> users = userService.getUserListByProxy(proxy_id);
+            result.setMessageOfSuccess();
+            result.setData(users);
+        } catch (Exception e) {
+            result.setMessage(e.getMessage());
         }
         return result;
     }
+
 
     @PostMapping("getMyAddressAndFreight")
     public MapResult getMyFright() {
@@ -92,72 +53,13 @@ public class UserController extends BaseController {
         try {
             Map<String, Object> addressAndDistance = userService.addressAndDistance(getUserId());
             List<Map<String, Object>> wxShopCartList = shopCartService.getWxShopCartList(getUserId());
-            Map<String, Object> charge = Arith.calculationCharge(addressAndDistance.get("distance").toString(), wxShopCartList);
+            Map<String, Object> charge = Arith.calculationCharge(addressAndDistance.get("distance").toString(), wxShopCartList, getUser().getVip());
             result.setCode(Code.SUCCESS);
             result.put("address", addressAndDistance);
             result.put("cart", wxShopCartList);
             result.put("charge", charge);
         } catch (CustomException e) {
             result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
-
-
-    @PostMapping("updateRole")
-    public SingleResult<Object> updateRole(String user_id, Integer role_id) {
-        SingleResult<Object> result = new SingleResult<Object>();
-        try {
-            boolean isOk = userService.updateRole(user_id, role_id);
-            if (isOk) {
-                result.setMessageOfSuccess("授权成功");
-            } else {
-                result.setMessageOfError("授权失败");
-            }
-        } catch (Exception e) {
-            result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
-
-    @PostMapping("updateParentId")
-    public SingleResult<Object> updateProductPercent(String user_id, Long parent_id) {
-        SingleResult<Object> result = new SingleResult<Object>();
-        try {
-            boolean isOk = userService.updateParentId(user_id, parent_id);
-            if (isOk) {
-                result.setMessageOfSuccess("修改成功");
-            } else {
-                result.setMessageOfError("修改失败");
-            }
-        } catch (Exception e) {
-            result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
-
-    @PostMapping("updateStatus")
-    public SingleResult<Object> updateStatus(String user_id, String status) {
-        SingleResult<Object> result = new SingleResult<Object>();
-        try {
-            if(status==null) throw new CustomException("参数为空");
-            userService.updateStatus(user_id, status);
-            result.setMessageOfSuccess("修改成功");
-        } catch (Exception e) {
-            result.setMessageOfError(e.getMessage());
-        }
-        return result;
-    }
-
-    @RequestMapping(value = "updateMultiLogin", method = RequestMethod.POST)
-    public SingleResult<String> updateMultiLogin(Integer multi) {
-        SingleResult<String> result = new SingleResult<>();
-        try {
-            if (multi == null || multi > 2) throw new CustomException("参数异常");
-            userService.updateMultiLogin(getUserId(), multi);
-            result.setCode(Code.SUCCESS);
-        } catch (Exception e) {
-            result.setMessage(e.getMessage());
         }
         return result;
     }
@@ -180,6 +82,19 @@ public class UserController extends BaseController {
     }
 
 
+    @GetMapping("getUserAddress")
+    public SingleResult<Object> getUserAddress() {
+        SingleResult<Object> result = new SingleResult<>();
+        try {
+            List<Map<String, Object>> address = userService.getUserAddress(getUserId());
+            result.setCode(Code.SUCCESS);
+            result.setData(address);
+        } catch (Exception e) {
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
+
     @RequestMapping(value = "updateAddress", method = RequestMethod.POST)
     public SingleResult<Object> updateAddress(String user_id, String address) {
         SingleResult<Object> result = new SingleResult<Object>();
@@ -192,16 +107,39 @@ public class UserController extends BaseController {
         return result;
     }
 
-    @RequestMapping(value = "updateUserCity", method = RequestMethod.POST)
-    public SingleResult<Object> updateUserCity(String user_id, String city) {
+
+    @PostMapping("deleteAddress")
+    public SingleResult<Object> deleteAddress(String address_id) {
         SingleResult<Object> result = new SingleResult<Object>();
         try {
-            userService.updateUserCity(user_id, city);
-            result.setMessageOfSuccess("修改成功");
+            userService.deleteAddress(address_id);
+            result.setMessageOfSuccess("删除成功");
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
         }
         return result;
     }
+
+    @PostMapping("setDefaultAddress")
+    public SingleResult<String> setDefaultAddress(String address_id) {
+        SingleResult<String> result = new SingleResult();
+        try {
+            userService.setDefaultAddress(address_id);
+            result.setMessageOfSuccess("设置成功");
+            result.setData(address_id);
+        } catch (Exception e) {
+            result.setMessageOfError(e.getMessage());
+        }
+        return result;
+    }
+
+
+    @PostMapping("test")
+    public SingleResult<String> test(String address_id) {
+        SingleResult<String> result = new SingleResult();
+        System.out.println(address_id);
+        return result;
+    }
+
 
 }

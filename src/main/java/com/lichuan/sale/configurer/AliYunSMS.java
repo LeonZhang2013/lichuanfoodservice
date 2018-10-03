@@ -30,7 +30,7 @@ public class AliYunSMS {
     static final String accessKeyId = "LTAIbHl7YNNih800";
     static final String accessKeySecret = "SSZxlQ3Ko7iYFvQGuuJAwT70IMex1V";
 
-    public static SendSmsResponse sendSms(String phone,String vrCode) throws ClientException {
+    public static SendSmsResponse sendSms(String phone, String vrCode) throws ClientException {
 
         //可自助调整超时时间
         System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
@@ -52,7 +52,7 @@ public class AliYunSMS {
 
         //可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为
         JSONObject obj = new JSONObject();
-        obj.put("code",vrCode);
+        obj.put("code", vrCode);
         request.setTemplateParam(obj.toJSONString());
 
         //选填-上行短信扩展码(无特殊需求用户请忽略此字段)
@@ -68,10 +68,9 @@ public class AliYunSMS {
     }
 
 
-
-
     /**
      * 查询 验证码。
+     *
      * @param bizId
      * @return
      * @throws ClientException
@@ -110,7 +109,7 @@ public class AliYunSMS {
     public static void main(String[] args) throws ClientException, InterruptedException {
 
         //发短信
-        SendSmsResponse response = sendSms("15828066838","2121");
+        SendSmsResponse response = sendSms("15828066838", "2121");
         System.out.println("短信接口返回的数据----------------");
         System.out.println("Code=" + response.getCode());
         System.out.println("Message=" + response.getMessage());
@@ -120,15 +119,14 @@ public class AliYunSMS {
         Thread.sleep(3000L);
 
         //查明细
-        if(response.getCode() != null && response.getCode().equals("OK")) {
+        if (response.getCode() != null && response.getCode().equals("OK")) {
             QuerySendDetailsResponse querySendDetailsResponse = querySendDetails(response.getBizId());
             System.out.println("短信明细查询接口返回数据----------------");
             System.out.println("Code=" + querySendDetailsResponse.getCode());
             System.out.println("Message=" + querySendDetailsResponse.getMessage());
             int i = 0;
-            for(QuerySendDetailsResponse.SmsSendDetailDTO smsSendDetailDTO : querySendDetailsResponse.getSmsSendDetailDTOs())
-            {
-                System.out.println("SmsSendDetailDTO["+i+"]:");
+            for (QuerySendDetailsResponse.SmsSendDetailDTO smsSendDetailDTO : querySendDetailsResponse.getSmsSendDetailDTOs()) {
+                System.out.println("SmsSendDetailDTO[" + i + "]:");
                 System.out.println("Content=" + smsSendDetailDTO.getContent());
                 System.out.println("ErrCode=" + smsSendDetailDTO.getErrCode());
                 System.out.println("OutId=" + smsSendDetailDTO.getOutId());
@@ -143,7 +141,6 @@ public class AliYunSMS {
         }
 
     }
-
 
 
 }

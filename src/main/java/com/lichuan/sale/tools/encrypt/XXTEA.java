@@ -2,18 +2,19 @@ package com.lichuan.sale.tools.encrypt;
 
 /**
  * XXTEA加密算法
+ *
  * @author 李熠
+ * @version 0.1.3
  * @date 2014-7-8
  * @company 成都市映潮科技有限公司
- * @version 0.1.3
  * @since 0.1.3
  */
 public class XXTEA {
-	
-//	private static int delta = 0x9e3779b;
-	private static int delta = 0x98e7a9b;
-	
-	 /**
+
+    //	private static int delta = 0x9e3779b;
+    private static int delta = 0x98e7a9b;
+
+    /**
      * Encrypt data with key.
      *
      * @param data
@@ -26,6 +27,7 @@ public class XXTEA {
         }
         return ByteUtils.intArray2ByteArray(encrypt(ByteUtils.byteArray2IntArray(data, true), ByteUtils.byteArray2IntArray(key, false)), false);
     }
+
     /**
      * Decrypt data with key.
      *
@@ -39,6 +41,7 @@ public class XXTEA {
         }
         return ByteUtils.intArray2ByteArray(decrypt(ByteUtils.byteArray2IntArray(data, false), ByteUtils.byteArray2IntArray(key, false)), true);
     }
+
     /**
      * Encrypt data with key.
      *
@@ -70,6 +73,7 @@ public class XXTEA {
         }
         return data;
     }
+
     /**
      * Decrypt data with key.
      *
@@ -102,28 +106,30 @@ public class XXTEA {
         }
         return data;
     }
-    
+
     /**
      * 加密
+     *
      * @param password 明文
-     * @param key 密钥
+     * @param key      密钥
      * @return 密文
      */
-   public static String encrypt(String password,String key){
-	   byte[] data = encrypt(password.getBytes(), key.getBytes());
-	   return ByteUtils.byte2HexString(data);
-   }
-   
-   /**
-    * 解密
-    * @param password 密文
-    * @param key 密钥
-    * @return 明文
-    * @throws Exception 如果传入的密文有误，则会抛出异常
-    */
-   public static String decrypt(String password,String key) throws Exception{
-	   byte[] data = decrypt(ByteUtils.hexString2Byte(password), key.getBytes());
-	   return new String(data);
-   }
-  
+    public static String encrypt(String password, String key) {
+        byte[] data = encrypt(password.getBytes(), key.getBytes());
+        return ByteUtils.byte2HexString(data);
+    }
+
+    /**
+     * 解密
+     *
+     * @param password 密文
+     * @param key      密钥
+     * @return 明文
+     * @throws Exception 如果传入的密文有误，则会抛出异常
+     */
+    public static String decrypt(String password, String key) throws Exception {
+        byte[] data = decrypt(ByteUtils.hexString2Byte(password), key.getBytes());
+        return new String(data);
+    }
+
 }

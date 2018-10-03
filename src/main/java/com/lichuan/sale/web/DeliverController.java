@@ -1,9 +1,7 @@
 package com.lichuan.sale.web;
 
 import com.lichuan.sale.core.CustomException;
-import com.lichuan.sale.model.Product;
 import com.lichuan.sale.result.Code;
-import com.lichuan.sale.result.MultiResult;
 import com.lichuan.sale.result.SingleResult;
 import com.lichuan.sale.tools.sqltools.Pager;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,10 +23,10 @@ public class DeliverController extends BaseController {
     public SingleResult<Object> getDeliverProduct() {
         SingleResult<Object> result = new SingleResult<>();
         try {
-            if(getStorageId()==null || getStorageId() == 0){
+            if (getStorageId() == null || getStorageId() == 0) {
                 throw new CustomException("未分配仓库");
             }
-            List<Map<String,Object>> deliverData = deliverService.getDeliverProduct(getUserId());
+            List<Map<String, Object>> deliverData = deliverService.getDeliverProduct(getUser());
             result.setData(deliverData);
             result.setCode(Code.SUCCESS);
         } catch (Exception e) {
@@ -38,11 +36,11 @@ public class DeliverController extends BaseController {
     }
 
     @GetMapping("getDeliverOrderList")
-    public SingleResult<Object> getDeliverOrderList (String key) {
+    public SingleResult<Object> getDeliverOrderList(String key) {
         SingleResult<Object> result = new SingleResult<>();
         result.setCode(Code.ERROR);
         try {
-            List<Map<String,Object>> orderList = deliverService.getDeliverOrderList(getUserId(),key);
+            List<Map<String, Object>> orderList = deliverService.getDeliverOrderList(getUser(), key);
             result.setCode(Code.SUCCESS);
             result.setData(orderList);
         } catch (Exception e) {
@@ -54,14 +52,15 @@ public class DeliverController extends BaseController {
 
     /**
      * 获取用户订单详情
+     *
      * @param order_id
      * @return
      */
     @GetMapping("getUserOrderInfo")
-    public SingleResult<Object> getUserOrderInfo (String order_id) {
+    public SingleResult<Object> getUserOrderInfo(String order_id) {
         SingleResult<Object> result = new SingleResult<>();
         try {
-            List<Map<String,Object>> order =  deliverService.getUserOrderInfo(order_id);
+            List<Map<String, Object>> order = deliverService.getUserOrderInfo(order_id);
             result.setCode(Code.SUCCESS);
             result.setData(order);
         } catch (Exception e) {
@@ -72,15 +71,16 @@ public class DeliverController extends BaseController {
 
     /**
      * 配送完毕
-     * @param deliverJson  json 参数 product_id, buy_num, deliver_num
+     *
+     * @param deliverJson json 参数 product_id, buy_num, deliver_num
      * @param order_id
      * @return
      */
     @PostMapping("deliverOk")
-    public SingleResult<String> deliverOk (String deliverJson,String order_id) {
+    public SingleResult<String> deliverOk(String deliverJson, String order_id) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            deliverService.deliverOk(deliverJson,order_id);
+            deliverService.deliverOk(deliverJson, order_id);
             result.setCode(Code.SUCCESS);
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
@@ -91,10 +91,10 @@ public class DeliverController extends BaseController {
 
     //收货： 获取数据
     @GetMapping("getReceiveOrderInfo")
-    public SingleResult<Object> getReceiveOrderInfo (Long order_id) {
+    public SingleResult<Object> getReceiveOrderInfo(Long order_id) {
         SingleResult<Object> result = new SingleResult<>();
         try {
-            List<Map<String,Object>> data = deliverService.getReceiveOrderInfo(order_id);
+            List<Map<String, Object>> data = deliverService.getReceiveOrderInfo(order_id);
             result.setCode(Code.SUCCESS);
             result.setData(data);
         } catch (Exception e) {
@@ -105,11 +105,11 @@ public class DeliverController extends BaseController {
 
     //收货： 确实收货
     @PostMapping("confirmReceive")
-    public SingleResult<String> confirmReceive(String order_id,String dataJson,String log) {
+    public SingleResult<String> confirmReceive(String order_id, String dataJson, String log) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            if(log == null) log = "";
-            deliverService.confirmReceive(dataJson,log,getStorageId(),getUserId(),order_id);
+            if (log == null) log = "";
+            deliverService.confirmReceive(dataJson, log, getStorageId(), getUserId(), order_id);
             result.setCode(Code.SUCCESS);
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());
@@ -122,7 +122,7 @@ public class DeliverController extends BaseController {
     public SingleResult<Object> receiveList(Pager<Map<String, Object>> pager) {
         SingleResult<Object> result = new SingleResult<>();
         try {
-            List<Map<String, Object>> maps = deliverService.receiveList(pager,getStorageId());
+            List<Map<String, Object>> maps = deliverService.receiveList(pager, getStorageId());
             result.setCode(Code.SUCCESS);
             result.setData(maps);
         } catch (Exception e) {
@@ -134,14 +134,13 @@ public class DeliverController extends BaseController {
     //补仓  回显 数据
 
     /**
-     *
      * @return
      */
     @GetMapping("getStorageInfo")
-    public SingleResult<Object> getStorageInfo () {
+    public SingleResult<Object> getStorageInfo() {
         SingleResult<Object> result = new SingleResult<>();
         try {
-            List<Map<String,Object>> data = deliverService.getStorageInfo(getStorageId());
+            List<Map<String, Object>> data = deliverService.getStorageInfo(getStorageId());
             result.setCode(Code.SUCCESS);
             result.setData(data);
         } catch (Exception e) {
@@ -156,7 +155,7 @@ public class DeliverController extends BaseController {
     public SingleResult<String> sendStorageOrder(String dataJson) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            deliverService.sendStorageOrder(dataJson,getUserId(),getStorageId());
+            deliverService.sendStorageOrder(dataJson, getUserId(), getStorageId());
             result.setCode(Code.SUCCESS);
         } catch (Exception e) {
             result.setMessageOfError(e.getMessage());

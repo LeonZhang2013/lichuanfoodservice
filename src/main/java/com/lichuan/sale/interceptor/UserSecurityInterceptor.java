@@ -1,13 +1,14 @@
 package com.lichuan.sale.interceptor;
 
 import com.alibaba.fastjson.JSON;
+import com.lichuan.sale.annoation.SysContent;
 import com.lichuan.sale.model.User;
 import com.lichuan.sale.result.Code;
 import com.lichuan.sale.result.SingleResult;
+import com.lichuan.sale.service.SysUserService;
 import com.lichuan.sale.service.UserService;
-import com.lichuan.sale.tools.StringUtils;
-import com.lichuan.sale.tools.encrypt.Algorithm;
-import com.lichuan.sale.tools.encrypt.MessageDigestUtils;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -16,7 +17,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class UserSecurityInterceptor implements HandlerInterceptor {
@@ -24,6 +27,7 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
     //存放所有不需要拦截的接口
     private static List<String> pageList = new ArrayList<>();
     private UserService userService;
+    private SysUserService sysUserService;
 
     static {
         pageList.add("login");
@@ -40,8 +44,9 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         pageList.add("getNotice");
         pageList.add("getStorageList");
         pageList.add("getSaler");
-        pageList.add("addWXAddress");
         pageList.add("notifyInfo");
+        pageList.add("updateApk");
+
     }
 
 
@@ -59,72 +64,24 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         response.setHeader("Content-type", "text/html;charset=UTF-8");
         //这句话的意思，是告诉servlet用UTF-8转码，而不是用默认的ISO8859
         //response.setCharacterEncoding("UTF-8");
+        SingleResult result = new SingleResult();
         response.setCharacterEncoding("UTF-8");
         String url = request.getRequestURL().toString();
         inject(request);
-
+        User user = null;
         if (!contains(pageList, url)) {
-            //接口安全性验证规则：
-            //1.登录后，服务器返回token
-            //2.客户端拿到token后，生成签名
-            //3.签名生成规则：参数升序排列进行sha1加密，生成签名
-            //服务端获取参数，按照同样方式加密，生成签名，验证签名合法性
-            //如果合法，则通过token获取用户信息
-            String signatrue = request.getHeader("signatrue");
-            String timestamp = request.getHeader("timestamp");
-            String token = request.getHeader("token");
-            User user = null;
-            SingleResult<String> result = new SingleResult<>();
-
-            if (StringUtils.isBlank(signatrue) || StringUtils.isBlank(timestamp) || StringUtils.isBlank(token)) {
-                result.setCode(Code.EXP_TOKEN);
-                response.getWriter().print(JSON.toJSONString(result));
-                return false;
-            }
-            Enumeration<String> params = request.getParameterNames();
-            List<Map<String, Object>> paramList = new ArrayList<>();
-            Map<String, Object> map = new HashMap<>();
-            map.put("token", token);
-            paramList.add(map);
-            map = new HashMap<>();
-            map.put("timestamp", timestamp);
-            paramList.add(map);
-            while (params.hasMoreElements()) {
-                String name = params.nextElement();
-                String value = request.getParameter(name);
-                map = new HashMap<>();
-                map.put(name, value);
-                paramList.add(map);
-            }
-            //按照字母排序（升序）
-            Collections.sort(paramList, new Comparator<Map<String, Object>>() {
-                @Override
-                public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-                    return o1.keySet().iterator().next().compareTo(o2.keySet().iterator().next());
-                }
-            });
-            StringBuilder builder = new StringBuilder();
-            boolean first = true;
-            for (Map<String, Object> item : paramList) {
-                if (!first) {
-                    builder.append('&');
+            boolean pass = validateSign(request);
+            if (pass) {
+                String token = request.getParameter("token");
+                String flag = request.getParameter("flag");
+                if ("sys".equals(flag)) {
+                    user = sysUserService.getUserByToken(token);
                 } else {
-                    first = false;
+                    user = userService.getUserByToken(token);
                 }
-                for (Map.Entry<String, Object> entry : item.entrySet()) {
-                    builder.append(entry.getKey()).append('=').append(entry.getValue());
-                }
-            }
-
-
-
-
-            String sign = MessageDigestUtils.encrypt(builder.toString(), Algorithm.SHA1);
-            if (sign.equals(signatrue)) {
-                user = userService.getUserByToken(token);
                 if (null != user) {
-                    if (user.getStatus_()==1) {
-                        request.setAttribute("user", user);
+                    if (user.getStatus_() == 1) {
+                        SysContent.setUser(user);
                         //保存日志 没写
                     } else {
                         result.setCode(Code.DISABLED);
@@ -143,6 +100,31 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
             }
         }
         return true;
+
+    }
+
+    /**
+     * 一个简单的签名认证，规则：
+     * 1. 将请求参数按ascii码排序
+     * 2. 拼接为a=value&b=value...这样的字符串（不包含sign）
+     * 3. 混合密钥（secret）进行md5获得签名，与请求的签名进行比较
+     */
+    private boolean validateSign(HttpServletRequest request) {
+        String requestSign = request.getHeader("sign");//获得请求签名，如sign=19e907700db7ad91318424a97c54ed57
+        if (StringUtils.isEmpty(requestSign)) {
+            return false;
+        }
+        List<String> keys = new ArrayList(request.getParameterMap().keySet());
+        Collections.sort(keys);//排序
+        StringBuilder sb = new StringBuilder();
+        for (String key : keys) {
+            sb.append(key).append("=").append(request.getParameter(key)).append("&");//拼接字符串
+        }
+        String linkString = sb.toString();
+        linkString = StringUtils.substring(linkString, 0, linkString.length() - 1);//去除最后一个'&'
+        String APP_SECRET = "lichuan";//密钥，自己修改
+        String sign = DigestUtils.sha1Hex(linkString + APP_SECRET);//混合密钥md5
+        return StringUtils.equals(sign, requestSign);//比较
     }
 
     @Override
@@ -182,6 +164,9 @@ public class UserSecurityInterceptor implements HandlerInterceptor {
         BeanFactory factory = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
         if (null == userService) {
             userService = factory.getBean(UserService.class);
+        }
+        if (null == sysUserService) {
+            sysUserService = factory.getBean(SysUserService.class);
         }
 
     }

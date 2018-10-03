@@ -2,8 +2,11 @@ package com.lichuan.sale.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.lichuan.sale.configurer.StorageStatus;
 import com.lichuan.sale.core.CustomException;
+import com.lichuan.sale.model.User;
 import com.lichuan.sale.tools.Tools;
+import com.lichuan.sale.tools.sqltools.MySql;
 import com.lichuan.sale.tools.sqltools.Pager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +18,12 @@ import java.util.Map;
 public class DeliverService extends BaseService {
 
 
-    public List<Map<String, Object>> getDeliverProduct(Long userId) {
-        return deliverDao.getDeliverProduct(userId);
+    public List<Map<String, Object>> getDeliverProduct(User user) throws CustomException {
+        return deliverDao.getDeliverProduct(user);
     }
 
-    public List<Map<String, Object>> getDeliverOrderList(Long userId, String key) throws CustomException {
-        return deliverDao.getDeliverOrderList(userId, key);
+    public List<Map<String, Object>> getDeliverOrderList(User user, String key) throws CustomException {
+        return deliverDao.getDeliverOrderList(user, key);
     }
 
     public List<Map<String, Object>> getUserOrderInfo(String order_id) {
@@ -40,14 +43,14 @@ public class DeliverService extends BaseService {
     }
 
     public List<Map<String, Object>> getStorageInfo(Long storageId) throws CustomException {
-        List<Map<String, Object>> products = deliverDao.getShoppingProduct();
-        List<Map<String, Object>> orderNum = deliverDao.getUserOrderNum(storageId);
         List<Map<String, Object>> storageNum = deliverDao.getStorageProductNum(storageId);
-        List<Map<String, Object>> waitNum = storageDao.getNotCompleteOrderNum(storageId.toString());
-        Tools.mergeMap(products, orderNum, "product_id");
-        Tools.mergeMap(products, storageNum, "product_id");
-        Tools.mergeMap(products, waitNum, "product_id");
-        return products;
+        List<Map<String, Object>> orderNum = deliverDao.getUserOrderNum(storageId);
+        List<Map<String, Object>> requestNum = storageDao.getStorageOrderRequest(storageId.toString());
+        List<Map<String, Object>> waitNum = storageDao.getStorageOrderWait(storageId.toString());
+        Tools.mergeMap(storageNum, orderNum, "product_id");
+        Tools.mergeMap(storageNum, waitNum, "product_id");
+        Tools.mergeMap(storageNum, requestNum, "product_id");
+        return storageNum;
     }
 
 
@@ -55,7 +58,7 @@ public class DeliverService extends BaseService {
     public void confirmReceive(String dataJson, String log, Long storageId, Long userId, String order_id) throws CustomException {
         JSONArray list = JSON.parseArray(dataJson);
         deliverDao.updateStorageNum(list, storageId);
-        deliverDao.confirmReceive(list, log, storageId, userId,order_id);
+        deliverDao.confirmReceive(list, log, storageId, userId, order_id);
     }
 
     public List<Map<String, Object>> receiveList(Pager<Map<String, Object>> pager, Long storage_id) throws CustomException {
@@ -63,8 +66,8 @@ public class DeliverService extends BaseService {
     }
 
     @Transactional
-    public void sendStorageOrder(String dataJson,Long userId, Long storageId) {
+    public void sendStorageOrder(String dataJson, Long userId, Long storageId) {
         deliverDao.deleteOrder(storageId);
-        deliverDao.createOrder(storageId,userId,dataJson);
+        deliverDao.createOrder(storageId, userId, dataJson);
     }
 }

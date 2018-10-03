@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("cart")
-public class ShopCartController extends BaseController{
+public class ShopCartController extends BaseController {
 
 
     @PostMapping("getCartTotalNum")
@@ -43,6 +43,7 @@ public class ShopCartController extends BaseController{
 
     /**
      * 添加商品
+     *
      * @param user_id
      * @param product_id
      * @param num
@@ -53,7 +54,7 @@ public class ShopCartController extends BaseController{
         SingleResult<Integer> result = new SingleResult<>();
         try {
             if (null != product_id && null != num) {
-                if(user_id==null) user_id= getUserId();
+                if (user_id == null) user_id = getUserId();
                 Integer count = shopCartService.addShopCart(user_id, product_id, num);
                 result.setCode(Code.SUCCESS);
                 result.setData(count);
@@ -86,12 +87,12 @@ public class ShopCartController extends BaseController{
 
 
     @PostMapping("saveCart")
-    public SingleResult saveCart(String carts){
+    public SingleResult saveCart(String carts) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            if (null != carts ) {
-                List<ShopCart> arras = JSON.parseArray(carts,ShopCart.class);
-                shopCartService.saveCartList(arras,getUserId());
+            if (null != carts) {
+                List<ShopCart> arras = JSON.parseArray(carts, ShopCart.class);
+                shopCartService.saveCartList(arras, getUserId());
                 result.setCode(Code.SUCCESS);
             } else {
                 result.setCode(Code.EXP_PARAM);
@@ -108,7 +109,7 @@ public class ShopCartController extends BaseController{
         SingleResult<String> result = new SingleResult<>();
         try {
             if (null != cartId && null != userId && null != num) {
-                 shopCartService.setShopCart(cartId, userId, num);
+                shopCartService.setShopCart(cartId, userId, num);
                 result.setCode(Code.SUCCESS);
             } else {
                 result.setCode(Code.EXP_PARAM);
@@ -124,9 +125,9 @@ public class ShopCartController extends BaseController{
     public SingleResult<String> deleteShopCart(Long cartId, Long userId) {
         SingleResult<String> result = new SingleResult<>();
         try {
-            if (null != cartId && null != userId){
-               shopCartService.deleteShopCart(cartId, userId);
-               result.setCode(Code.SUCCESS);
+            if (null != cartId && null != userId) {
+                shopCartService.deleteShopCart(cartId, userId);
+                result.setCode(Code.SUCCESS);
             } else {
                 result.setCode(Code.EXP_PARAM);
             }
@@ -186,8 +187,6 @@ public class ShopCartController extends BaseController{
         }
         return result;
     }
-
-
 
 
 }

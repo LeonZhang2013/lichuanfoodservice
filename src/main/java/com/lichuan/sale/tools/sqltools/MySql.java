@@ -57,12 +57,10 @@ public class MySql {
     }
 
 
-
-
     @Override
     public String toString() {
-        System.out.println( sql.toString());
-        for (int i=0; i<values.size(); i++){
+        System.out.println(sql.toString());
+        for (int i = 0; i < values.size(); i++) {
             System.out.print(values.get(i).toString());
         }
         return sql.toString();
@@ -71,7 +69,7 @@ public class MySql {
     public void append(String s, Object... keys) throws CustomException {
         List<Object> temp = new ArrayList<>();
         for (Object key : keys) {
-            if (StringUtils.isNotNull(key)&&!key.toString().contains("null")) {
+            if (StringUtils.isNotNull(key) && !key.toString().contains("null")) {
                 temp.add(key);
             } else {
                 throw new CustomException("参数异常");
@@ -85,7 +83,7 @@ public class MySql {
         boolean isOk = true;
         List<Object> temp = new ArrayList<>();
         for (Object key : keys) {
-            if (StringUtils.isNotNull(key)&&!key.toString().contains("null")) {
+            if (StringUtils.isNotNull(key) && !key.toString().contains("null")) {
                 temp.add(key);
             } else {
                 isOk = false;
@@ -118,9 +116,9 @@ public class MySql {
 
     public long getCount(JdbcTemplate jdbcTemplate) {
         StringBuilder sb = new StringBuilder();
-        sb.append("select count(*) num ").append(sql.substring(sql.indexOf("from"),sql.length()));
+        sb.append("select count(*) num ").append(sql.substring(sql.indexOf("from"), sql.length()));
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(sb.toString(), getValues());
-        return (long)maps.get(0).get("num");
+        return (long) maps.get(0).get("num");
     }
 
     public void update(String s) {

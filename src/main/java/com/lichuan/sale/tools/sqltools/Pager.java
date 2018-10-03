@@ -7,58 +7,58 @@ import java.util.List;
 
 /**
  * 后台easyui要求格式
- * @author hp
  *
  * @param <T>
+ * @author hp
  */
 public class Pager<T> {
 
-	private int rows = 30;//每页显示多少条
-	
-	private int page = 1;//当前页
-	
-	private long total = 0;
-	
-	private List<T> data = new ArrayList<T>();
-	
-	public long getTotalPage() {
-		return (long)Math.ceil((double)total / (double)rows);
-	}
+    private int rows = 30;//每页显示多少条
 
-	public long getTotal() {
-		return total;
-	}
-	
-	public void setTotal(long total) {
-		this.total = total;
-	}
+    private int page = 1;//当前页
 
-	public int getPage() {
-		return page;
-	}
+    private long total = 0;
 
-	public void setPage(int page) {
-		this.page = page;
-	}
+    private List<T> data = new ArrayList<T>();
 
-	public int getRows() {
-		return rows;
-	}
-	
-	public void setRows(int rows) {
-		this.rows = rows;
-	}
-	
-	public List<T> getData() {
-		return data;
-	}
-	
-	public void setData(List<T> data) {
-		this.data = data;
-	}
+    public long getTotalPage() {
+        return (long) Math.ceil((double) total / (double) rows);
+    }
 
-	@Override
-	public String toString() {
-		return JSON.toJSONString(this);
-	}
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public void setRows(int rows) {
+        this.rows = rows;
+    }
+
+    public List<T> getData() {
+        return data;
+    }
+
+    public void setData(List<T> data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
 }
