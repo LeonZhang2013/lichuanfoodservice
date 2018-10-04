@@ -7,7 +7,7 @@
     <groupId>com.github.lihengming</groupId>
     <artifactId>spring-boot-api-project-seed</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <properties>
         <java.version>1.8</java.version>
@@ -36,20 +36,13 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-<<<<<<< HEAD
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>compile</scope>
             <!--<scope>provided</scope>-->
         </dependency>
-        <!--界面-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-freemarker</artifactId>
-        </dependency>
-=======
->>>>>>> parent of 74030c2... 项目基本完成,,只差支付系统
 
 
         <!--常用库依赖-->
@@ -74,11 +67,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
 
@@ -131,7 +119,7 @@
             <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <!--========================-->
+
 
     </dependencies>
 
